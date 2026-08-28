@@ -1,4 +1,4 @@
-import { TextField, Box, Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import Logo from "../../../../assets/CarniSoftLogo.png"
 
 const Inicio = () => {

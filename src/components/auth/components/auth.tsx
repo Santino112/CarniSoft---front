@@ -23,7 +23,6 @@ export const Login = () => {
     const [nombre, setNombre] = useState('');
     const [asunto, setAsunto] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    const [isConsulta, setIsConsulta] = useState(false);
     const [isLoadingLogin, setIsLoadingLogin] = useState(false);
     const [isLoadingRegister, setIsLoadingRegister] = useState(false);
     const [isLoadingConsulta, setIsLoadingConsulta] = useState(false);
