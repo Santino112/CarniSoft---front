@@ -1,0 +1,28 @@
+:root {
+    --app-height: 100%;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #C62828 transparent; /* [Color de la barra] [Color del fondo] */
+}
+
+::-webkit-scrollbar {
+  width: 6px; /* Ancho del scroll vertical */ /* Fondo negro para que no se vea blanco */
+}
+
+/* 2. La barrita que se mueve (el "pulgar") */
+::-webkit-scrollbar-thumb {
+  background: #2f2f2f; 
+  border-radius: 8px;
+}
+
+/* 3. Cuando pasas el mouse por encima de la barrita */
+::-webkit-scrollbar-thumb:hover {
+  background: #8E0000; /* Un azul un poco más vibrante al interactuar */
+}
+
+html, body {
+    height: 100%;
+    height: var(--app-height);
+}
