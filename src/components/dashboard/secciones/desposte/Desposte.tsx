@@ -578,7 +578,7 @@ const Desposte: React.FC<DesposteProps> = () => {
       {
         costoRealPorKg > 0 && (
           <Alert severity="info" sx={{ mb: 2, borderRadius: 3, boxShadow: 4 }}>
-            El costo real por kg de esta res es <strong>{formatPesos(costoRealPorKg)}/kg</strong>.
+            El costo real por kg de esta res es <strong>{formatPesos(costoRealPorKg)}/Kg</strong>.
             Los cortes con precio de venta por debajo de este valor generan pérdida.
           </Alert>
         )
@@ -626,10 +626,10 @@ const Desposte: React.FC<DesposteProps> = () => {
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        PaperProps={{ sx: { borderRadius: 3, minWidth: 320, backgroundColor: "background.default" } }}
+        PaperProps={{ sx: { borderRadius: 3, minWidth: 320, backgroundColor: '#141414', border: 'none' } }}
       >
-        <DialogContent sx={{ p: 0, border: "2px solid red" }}>
-          <NuevaRes onIniciarDesposte={handleIniciarDesposte} />
+        <DialogContent sx={{ p: 0, border: 'none' }}>
+          <NuevaRes onIniciarDesposte={handleIniciarDesposte} onCancelar={() => setDialogOpen(false)} />
         </DialogContent>
       </Dialog>
     </Box >

@@ -24,7 +24,8 @@ import {
   FormControl,
   Stack,
   InputLabel,
-  CircularProgress
+  CircularProgress,
+  Divider
 } from "@mui/material";
 import { useHistorialReses } from "../../hooks/historialReses";
 import { useFiltrarCortes } from "../../hooks/filtrarCortes";
@@ -37,6 +38,7 @@ import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import TrendingDownRoundedIcon from '@mui/icons-material/TrendingDownRounded';
 import ListAltRoundedIcon from '@mui/icons-material/ListAltRounded';
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import LocalShippingRoundedIcon from '@mui/icons-material/LocalShippingRounded';
 
 const DIAS_ALERTA = 2;
 const DIAS_CRITICO = 4;
@@ -148,8 +150,8 @@ const Seguimiento = ({ }) => {
       <FormControl
         fullWidth
         sx={{
-          width: { xs: "100%", sm: 400 }, 
-          maxWidth: "100%", 
+          width: { xs: "100%", sm: 400 },
+          maxWidth: "100%",
           mb: 1,
           mt: { xs: 1, sm: 1, md: 0 },
         }}
@@ -158,7 +160,10 @@ const Seguimiento = ({ }) => {
           id="select-reses-label"
           sx={{ color: "#fff", "&.Mui-focused": { color: "#fff" } }}
         >
-          Lista de reses compradas
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LocalShippingRoundedIcon fontSize="small" />
+            Lista de reses compradas
+          </Box>
         </InputLabel>
         <Select
           labelId="select-reses-label"
@@ -169,10 +174,9 @@ const Seguimiento = ({ }) => {
             backgroundColor: "#141414",
             color: "#ffffff",
             width: "100%",
-            borderRadius: 4,
+            borderRadius: 3,
             boxShadow: 4,
             transition: "all 0.2s ease-in-out",
-            border: 'none',
             "&:hover .MuiOutlinedInput-notchedOutline": {
               borderColor: "#3f3f46",
             },
@@ -193,37 +197,37 @@ const Seguimiento = ({ }) => {
               sx: {
                 backgroundColor: "#141414",
                 color: "#f4f4f5",
-                borderRadius: 4,
+                borderRadius: 3,
                 marginTop: 1,
                 maxHeight: 300,
-                maxWidth: "calc(100vw - 32px)", 
-                border: "1px solid #27272a",
+                maxWidth: "calc(100vw - 32px)",
+                border: "1px solid #141414",
                 boxShadow:
-                  "0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)",
-
+                  4,
                 "& .MuiList-root": {
                   p: 1,
                 },
                 "& .MuiMenuItem-root": {
                   borderRadius: 3,
-                  py: 1.2,
+                  py: 1,
                   px: 2,
-                  my: 0.5,
+                  my: 0.7,
+                  mr: 1,
                   fontSize: "0.925rem",
-                  color: "#f9f9fa",
-                  whiteSpace: "normal", 
+                  color: "#ffffff",
+                  whiteSpace: "normal",
                   wordBreak: "break-word",
                   transition: "all 0.15s ease-in-out",
                   "&:hover": {
-                    backgroundColor: "#141414",
+                    backgroundColor: "#454546",
                     color: "#ffffff",
                   },
                   "&.Mui-selected": {
-                    backgroundColor: "#141414",
+                    backgroundColor: "#454546",
                     color: "#ffffff",
                     fontWeight: 600,
                     "&:hover": {
-                      backgroundColor: "#141414",
+                      backgroundColor: "#454546"
                     },
                   },
                 },
@@ -276,7 +280,7 @@ const Seguimiento = ({ }) => {
           <Typography variant="h5" fontWeight={600}>
             Seguimiento
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2">
             Res del {formatearFecha(resSeleccionada?.fecha_compra)} | Día {diasDesdeCompra}
           </Typography>
         </Box>
@@ -631,20 +635,20 @@ const Seguimiento = ({ }) => {
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        PaperProps={{ sx: { borderRadius: 3, minWidth: 320, backgroundColor: "background.default" } }}
+        PaperProps={{ sx: { borderRadius: 3, bgcolor: "background.default", border: 'none' } }}
       >
-        <DialogTitle fontWeight={600}>
-          {selectedCorte ? `Vender — ${selectedCorte.nombre}` : "Registrar venta"}
-        </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ bgcolor: "background.default", border: 'none' }}>
+          <Typography variant="h5" mb={1} fontWeight={600}>
+            {selectedCorte ? `Vender — ${selectedCorte.nombre}` : "Registrar venta"}
+          </Typography>
           {!resSeleccionada ? (
-            <Typography variant="body2" fontWeight={500} color="text.primary">No hay una res seleccionada. Seleccione una para ver los cortes.</Typography>
+            <Typography variant="body2" fontWeight={500} sx={{ fontSize: '1rem' }}>No hay una res seleccionada. Seleccione una para ver los cortes a vender.</Typography>
           ) : !selectedCorte ? (
-            <Box mb={2}>
-              <Typography variant="body2" mb={1} sx={{ color: "#ffffff" }}>
-                Seleccioná el corte:
+            <Box mb={1} sx={{ mx: "auto", bgcolor: "background.default", border: 'none' }}>
+              <Typography variant="body2" mb={1} sx={{ color: "#ffffff", fontSize: '1rem' }}>
+                Seleccioná el corte a vender:
               </Typography>
-              <Box display="flex" flexWrap="wrap" gap={1}>
+              <Box display="flex" flexWrap="wrap" gap={1} sx={{ mt: 2 }}>
                 {cortesFiltrados
                   .filter((c) => c.kgVendido < c.kgTotal)
                   .map((c) => (
@@ -652,16 +656,16 @@ const Seguimiento = ({ }) => {
                       key={c.id}
                       label={`${c.nombre} (${(c.kgTotal - c.kgVendido).toFixed(1)} kg)`}
                       onClick={() => setSelectedCorte(c)}
-                      sx={{ cursor: "pointer" }}
+                      sx={{ cursor: "pointer", bgcolor: "#373737", fontSize: '1rem', boxShadow: 2 }}
                     />
                   ))}
               </Box>
             </Box>
           ) : (
-            <Box mt={1}>
-              <Typography variant="body2" color="text.secondary" mb={2}>
-                Disponible: {(selectedCorte.kgTotal - selectedCorte.kgVendido).toFixed(1)} kg ·{" "}
-                {(selectedCorte.precioPorKg)}/kg
+            <Box sx={{ mx: "auto", bgcolor: "background.default", border: 'none', maxWidth: 330 }}>
+              <Typography variant="body2" mb={2}>
+                Disponible: {(selectedCorte.kgTotal - selectedCorte.kgVendido).toFixed(1)} Kg ·{" "}
+                {(selectedCorte.precioPorKg)}/Kg
               </Typography>
               <TextField
                 label="Kilos vendidos"
@@ -672,12 +676,12 @@ const Seguimiento = ({ }) => {
                 autoFocus
                 slotProps={{
                   input: {
-                    endAdornment: <InputAdornment position="end">kg</InputAdornment>,
+                    endAdornment: <InputAdornment position="end">Kg</InputAdornment>,
                   },
                 }}
               />
               {kgVenta && parseFloat(kgVenta) > 0 && (
-                <Typography variant="body2" color="success.main" mt={1}>
+                <Typography variant="body2" color="success.main" mt={1} sx={{ fontSize: '1rem' }}>
                   Ingreso: {formatPesos((parseFloat(kgVenta) * selectedCorte.precioPorKg))}
                 </Typography>
               )}
@@ -685,20 +689,36 @@ const Seguimiento = ({ }) => {
           )
           }
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => { setDialogOpen(false); setSelectedCorte(null); }}>
-            Cancelar
-          </Button>
+        <DialogActions sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'column', md: 'row' }, justifyContent: 'flex-end', alignItems: 'center', px: 2, pb: 2, bgcolor: "background.default" }}>
           {selectedCorte && (
             <Button
               variant="contained"
               onClick={handleConfirmarVenta}
               disabled={!selectedCorte || !kgVenta || parseFloat(kgVenta) <= 0}
-              sx={{ borderRadius: 2, color: "#ffffff", textTransform: "none" }}
+              sx={{ borderRadius: 3, color: "#ffffff", textTransform: "none", fontSize: '1rem', width: { xs: '100%', sm: '100%', md: '60%' }, mx: 0.50 }}
             >
               Confirmar venta
             </Button>
           )}
+          <Button
+            onClick={() => { setDialogOpen(false); setSelectedCorte(null); }}
+            sx={{
+              fontSize: "1rem",
+              mr: 1,
+              width: { xs: '100%', sm: '100%', md: '30%' },
+              borderRadius: 3,
+              textTransform: "none",
+              backgroundColor: 'transparent',
+              boxShadow: 2,
+              color: "#ffffff",
+              "&:hover": { backgroundColor: "#454546" },
+            }}>
+            {!resSeleccionada ? (
+              <span>Aceptar</span>
+            ) : (
+              <span>Cancelar</span>
+            )}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

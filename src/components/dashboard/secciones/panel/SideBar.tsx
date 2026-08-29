@@ -13,6 +13,13 @@ import Button from '@mui/material/Button';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+//Iconos sideBar
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import ContentCutRoundedIcon from '@mui/icons-material/ContentCutRounded';
+import TrackChangesRoundedIcon from '@mui/icons-material/TrackChangesRounded';
+import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
+import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
 
 const drawerWidth = 280;
 
@@ -54,7 +61,11 @@ function ResponsiveDrawer() {
                     position: "relative",
                     right: { xs: -5, sm: 3, md: 5, lg: 5, xl: 4 },
                     mr: "auto",
-                    color: "#ffffff"
+                    fontWeight: 'bold',
+                    backgroundImage: 'linear-gradient(90deg, #ff0101 0%, #ffffff 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent',
                 }}>
                     CarniSoft
                 </Typography>
@@ -72,74 +83,83 @@ function ResponsiveDrawer() {
                     backgroundColor: "rgb(20, 20, 20)",
                 }}
             >
-                <Button variant='contained' fullWidth onClick={() => setPaginaActiva("inicio")} sx={{
+                <Button variant='contained' startIcon={<HomeRoundedIcon fontSize='medium' />} fullWidth onClick={() => setPaginaActiva("inicio")} sx={{
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: "flex-start",
-                    backgroundColor: paginaActiva === 'inicio' ? '#ffffff' : 'transparent',
-                    boxShadow: paginaActiva === 'inicio' ? '0 0 10px #ffffff' : 'none',
-                    color: paginaActiva === 'inicio' ? '#000000' : '#ffffff',
+                    backgroundColor: paginaActiva === 'inicio' ? '#454546' : 'transparent',
+                    boxShadow: 2,
+                    color: '#ffffff',
                     borderRadius: 3,
                     textTransform: 'none',
                     fontSize: '1rem',
                     mb: 2,
-                    mt: 2,
                     "&:hover": {
-                        backgroundColor: "#ffffff",
-                        boxShadow: `0 0 10px #ffffff`,
-                        color: '#000000'
+                        backgroundColor: "#454546",
                     }
                 }}>Inicio</Button>
-                <Button variant='contained' fullWidth onClick={() => setPaginaActiva("desposte")} sx={{
+                <Button variant='contained' startIcon={<ContentCutRoundedIcon fontSize='small' />} fullWidth onClick={() => setPaginaActiva("desposte")} sx={{
                     justifyContent: "flex-start",
-                    backgroundColor: paginaActiva === 'desposte' ? '#ffffff' : 'transparent',
-                    boxShadow: paginaActiva === 'desposte' ? '0 0 10px #ffffff' : 'none',
-                    color: paginaActiva === 'desposte' ? '#000000' : '#ffffff',
+                    backgroundColor: paginaActiva === 'desposte' ? '#454546' : 'transparent',
+                    boxShadow: 2,
+                    color: '#ffffff',
                     borderRadius: 3,
                     textTransform: 'none',
                     fontSize: '1rem',
                     mb: 2,
                     "&:hover": {
-                        backgroundColor: "#ffffff",
-                        boxShadow: `0 0 10px #ffffff`,
-                        color: '#000000'
+                        backgroundColor: "#454546",
                     }
                 }}>Desposte de la res</Button>
-                <Button variant='contained' fullWidth onClick={() => setPaginaActiva("seguimiento")} sx={{
+                <Button variant='contained' startIcon={<TrackChangesRoundedIcon fontSize='small' />} fullWidth onClick={() => setPaginaActiva("seguimiento")} sx={{
                     justifyContent: "flex-start",
-                    backgroundColor: paginaActiva === 'seguimiento' ? '#ffffff' : 'transparent',
-                    boxShadow: paginaActiva === 'seguimiento' ? '0 0 10px #ffffff' : 'none',
-                    color: paginaActiva === 'seguimiento' ? '#000000' : '#ffffff',
+                    backgroundColor: paginaActiva === 'seguimiento' ? '#454546' : 'transparent',
+                    boxShadow: 2,
+                    color: '#ffffff',
                     borderRadius: 3,
                     textTransform: 'none',
                     fontSize: '1rem',
                     mb: 2,
                     "&:hover": {
-                        backgroundColor: "#ffffff",
-                        boxShadow: `0 0 10px #ffffff`,
-                        color: '#000000'
+                        backgroundColor: "#454546",
                     }
                 }}>Seguimiento y control</Button>
-                <Button variant='contained' disabled fullWidth sx={{
+                <Button variant='contained' startIcon={<ForumRoundedIcon fontSize='small' />} disabled fullWidth sx={{
                     justifyContent: "flex-start",
                     backgroundColor: 'transparent',
                     color: '#ffffff',
                     borderRadius: 3,
                     textTransform: 'none',
                     fontSize: '1rem',
-                    mb: 1,
+                    mb: 2,
                     "&:hover": {
                         backgroundColor: "#ffffff",
                         boxShadow: `0 0 10px #ffffff`,
                         color: '#000000'
                     }
                 }}>Chat con IA</Button>
+                <Button variant='contained' startIcon={<AssessmentRoundedIcon fontSize='small' />} disabled fullWidth sx={{
+                    justifyContent: "flex-start",
+                    backgroundColor: 'transparent',
+                    color: '#ffffff',
+                    borderRadius: 3,
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                    "&:hover": {
+                        backgroundColor: "#ffffff",
+                        boxShadow: `0 0 10px #ffffff`,
+                        color: '#000000'
+                    }
+                }}>Estadisticas</Button>
             </Box>
             <Box sx={{
                 flexGrow: 1,
-                backgroundColor: "rgb(20, 20, 20)",
+                backgroundColor: "#141414",
                 border: 'none'
             }}>
             </Box>
-            <Box sx={{ mt: 'auto', border: 'none' }}>
+            <Divider sx={{ color: '#141414' }} />
+            <Box sx={{ mt: 'auto', border: 'none', backgroundColor: '#141414' }}>
                 <MenuUsuario />
             </Box>
         </Box>

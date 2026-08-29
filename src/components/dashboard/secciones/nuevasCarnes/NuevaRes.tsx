@@ -7,9 +7,10 @@ import {
   Paper,
   Divider,
   InputAdornment,
-  Alert
+  CircularProgress
 } from "@mui/material";
-import { nuevaResService } from "../../dashboard.service";
+import { useSnackbar } from "../../../../context/SnackbarContext";
+import { useNuevaRes } from "../../hooks/registrarNuevaRes";
 import type { ResData } from "../../types";
 import ScaleIcon from "@mui/icons-material/Scale";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
@@ -19,9 +20,10 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 interface NuevaResProps {
   onIniciarDesposte?: (data: ResData) => void;
+  onCancelar?: () => void;
 }
 
-const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
+const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte, onCancelar }) => {
   const [proveedor, setProveedor] = useState("");
   const [fechaCompra, setFechaCompra] = useState(
     new Date().toISOString().split("T")[0]
@@ -29,13 +31,9 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
   const [pesoKg, setPesoKg] = useState<string>("");
   const [precioPorKg, setPrecioPorKg] = useState<string>("");
 
-  //Variables del alert
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertSeverity, setAlertSeverity] = useState<| 'success' | 'error' | 'warning' | 'info'>('error');
-
-  //Estados
-  const [isError, setIsError] = useState(false);
+  const { showSnackbar } = useSnackbar();
   const [isNuevaRes, setIsNuevaRes] = useState(false);
+  const { guardarNuevaRes, loadingGuardarRes } = useNuevaRes(onIniciarDesposte)
 
   const peso = parseFloat(pesoKg) || 0;
   const precio = parseFloat(precioPorKg) || 0;
@@ -51,66 +49,35 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
     e.preventDefault();
     setIsNuevaRes(true);
 
-    const resultado = await nuevaResService(proveedor, fechaCompra, peso, precio);
-
-    console.log('resultado:', resultado)
+    const resultado = await guardarNuevaRes(proveedor, fechaCompra, peso, precio);
 
     if (!resultado.success) {
       setIsNuevaRes(false);
-      setIsError(true);
-      setAlertMessage(resultado.message);
-      setAlertSeverity('error');
-      setTimeout(() => {
-        setIsError(false);
-        setIsNuevaRes(false);
-      }, 5000);
+      showSnackbar(resultado.message, 'error');
       return;
     };
-
-    onIniciarDesposte?.({
-      id: resultado.datosConsulta.data.id,
-      proveedor,
-      fecha: fechaCompra,
-      pesoKg: peso,
-      precioPorKg: precio,
-    });
 
     setProveedor('');
     setFechaCompra(new Date().toISOString().split("T")[0]);
     setPesoKg('');
     setPrecioPorKg('');
     setIsNuevaRes(false);
+    showSnackbar(resultado.message, 'success');
   };
 
   return (
-    <Box component='form' onSubmit={handleNuevaRes} sx={{ maxWidth: 560, mx: "auto", p: { xs: 2, sm: 4 }, bgcolor: "black", borderColor: "2px solid red" }}>
-      <Typography variant="h5" fontWeight={600} gutterBottom>
+    <Box component='form' onSubmit={handleNuevaRes} sx={{ maxWidth: 560, mx: "auto", p: { xs: 2.3, sm: 4 }, bgcolor: "background.default", border: 'none' }}>
+      <Typography variant="h5" mb={1} fontWeight={600}>
         Nueva res
       </Typography>
-      <Typography variant="body2" color="text.secondary" mb={1}>
+      <Typography variant="body2" mb={2} sx={{ fontSize: '1rem' }}>
         Registrá los datos de la compra para iniciar el desposte.
       </Typography>
       <Divider sx={{ my: 1 }} />
-      {isError && (
-        <Alert
-          variant='filled'
-          severity={alertSeverity}
-          sx={{
-            width: 'fit-content',
-            fontSize: '1rem',
-            color: "#ffffff",
-            borderRadius: 2,
-          }}
-        >
-          {alertMessage}
-        </Alert>
-      )}
-      <Paper variant="outlined" sx={{ p: 0, borderRadius: 3, mb: 3, bgcolor: "black", border: 'none' }}>
-        <Typography variant="overline" color="text.secondary" fontWeight={600}>
+      <Paper variant="outlined" sx={{ p: 0, borderRadius: 3, mb: 3, bgcolor: "background.default", border: 'none' }}>
+        <Typography variant="overline">
           Datos de la compra
         </Typography>
-        <Divider sx={{ my: 1 }} />
-
         <Box display="flex" flexDirection="column" gap={2.5} mt={2}>
           <TextField
             label="Proveedor"
@@ -118,6 +85,11 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
             onChange={(e) => setProveedor(e.target.value)}
             placeholder="Ej: Frigorífico Don Pedro"
             fullWidth
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 3,
+              }
+            }}
             slotProps={{
               input: {
                 startAdornment: (
@@ -135,6 +107,11 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
             value={fechaCompra}
             onChange={(e) => setFechaCompra(e.target.value)}
             fullWidth
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 3,
+              }
+            }}
             slotProps={{
               input: {
                 startAdornment: (
@@ -154,6 +131,11 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
               value={pesoKg}
               onChange={(e) => setPesoKg(e.target.value)}
               fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                }
+              }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -161,7 +143,7 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
                       <ScaleIcon fontSize="small" />
                     </InputAdornment>
                   ),
-                  endAdornment: <InputAdornment position="end">kg</InputAdornment>,
+                  endAdornment: <InputAdornment position="end">Kg</InputAdornment>,
                 },
               }}
             />
@@ -171,6 +153,11 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
               value={precioPorKg}
               onChange={(e) => setPrecioPorKg(e.target.value)}
               fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                }
+              }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -178,7 +165,7 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
                       <AttachMoneyIcon fontSize="small" />
                     </InputAdornment>
                   ),
-                  endAdornment: <InputAdornment position="end">$/kg</InputAdornment>,
+                  endAdornment: <InputAdornment position="end">$/Kg</InputAdornment>,
                 },
               }}
             />
@@ -192,14 +179,14 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
           p: 2,
           borderRadius: 3,
           mb: 3,
-          bgcolor: costoTotal > 0 ? "black" : "black",
+          bgcolor: costoTotal > 0 ? "background.default" : "transparent",
           borderColor: costoTotal > 0 ? "primary.200" : "divider",
           transition: "all 0.2s ease",
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
-            <Typography variant="overline" color="text.secondary" fontWeight={600}>
+            <Typography variant="overline">
               Costo total de la res
             </Typography>
             <Typography variant="h4" fontWeight={700} color={costoTotal > 0 ? "primary.main" : "text.disabled"}>
@@ -208,45 +195,62 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte }) => {
           </Box>
           {peso > 0 && precio > 0 && (
             <Box textAlign="right">
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption">
                 {peso} kg × {formatPesos(precio)}/kg
               </Typography>
             </Box>
           )}
         </Box>
       </Paper>
+      <Divider sx={{ mb: 2 }} />
       <Box sx={{
         display: 'flex',
         flexDirection: { xs: 'column', sm: 'column', md: 'row' },
         justifyContent: 'flex-end',
         gap: 2,
       }}>
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          disabled={!canSubmit}
-          sx={{
-            fontSize: "1rem",
-            mr: 1,
-            borderRadius: 2,
-            py: 1.5,
-            textTransform: "none",
-            backgroundColor: 'transparent'
-          }}
-        >
-          Cancelar
-        </Button>
+
         <Button
           variant="contained"
           size="large"
           type='submit'
           fullWidth
           disabled={!canSubmit || isNuevaRes}
-          endIcon={<ArrowForwardIcon />}
-          sx={{ borderRadius: 2, py: 1.5, fontWeight: 600 }}
+          sx={{ borderRadius: 3, textTransform: 'none', fontSize: '1rem' }}
         >
-          Iniciar desposte
+          {loadingGuardarRes ? (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <CircularProgress
+                size={20}
+                sx={{
+                  color: "#ffffff",
+                  marginRight: "10px"
+                }}
+              />
+              <span>Iniciando...</span>
+            </Box>
+          ) : (
+            <Typography sx={{ display: 'flex', alignItems: 'center' }}>Iniciar desposte<ArrowForwardIcon sx={{ ml: 1 }} /></Typography>
+          )}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={onCancelar}
+          size="large"
+          fullWidth
+          sx={{
+            fontSize: "1rem",
+            mr: 1,
+            mb: { xs: 1, sm: 1, md: 0 },
+            borderRadius: 3,
+            textTransform: "none",
+            backgroundColor: 'transparent',
+            boxShadow: 2,
+            color: "#ffffff",
+            "&:hover": { backgroundColor: "#454546" },
+          }}
+        >
+          Cancelar
         </Button>
       </Box>
     </Box>
