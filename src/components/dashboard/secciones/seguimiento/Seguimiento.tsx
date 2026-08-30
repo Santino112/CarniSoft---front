@@ -7,7 +7,6 @@ import {
   Chip,
   Button,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
@@ -25,7 +24,6 @@ import {
   Stack,
   InputLabel,
   CircularProgress,
-  Divider
 } from "@mui/material";
 import { useHistorialReses } from "../../hooks/historialReses";
 import { useFiltrarCortes } from "../../hooks/filtrarCortes";
