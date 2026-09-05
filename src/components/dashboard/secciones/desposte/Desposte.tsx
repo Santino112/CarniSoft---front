@@ -27,9 +27,15 @@ import { useGuardarDesposte } from "../../hooks/desposte";
 import { useHistorialReses } from "../../hooks/historialReses";
 import { useFiltrarCortes } from "../../hooks/filtrarCortes";
 import type { ResData, CortesNuevos, ResHistorial } from "../../types";
+import ContentCutRoundedIcon from '@mui/icons-material/ContentCutRounded';
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import LocalShippingRoundedIcon from '@mui/icons-material/LocalShippingRounded';
+import ScaleIcon from '@mui/icons-material/Scale';
+import PaymentsRoundedIcon from '@mui/icons-material/PaymentsRounded';
+import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded';
+import EventRoundedIcon from '@mui/icons-material/EventRounded';
 
 interface DesposteProps {
   onGuardar?: (cortes: CortesNuevos[]) => void;
@@ -46,11 +52,9 @@ let nextId = 1;
 const Desposte: React.FC<DesposteProps> = () => {
   const [resActual, setResActual] = useState<ResData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [cortes, setCortes] = useState<CortesNuevos[]>([
-    { id: nextId++, nombre: "Asado", kg: 0, precio_por_kg: 0 },
-  ]);
-  const { reses, loadingReses } = useHistorialReses();
-  const { cortesFiltrados, filtrarCortes, loadingCortes } = useFiltrarCortes();
+  const [cortes, setCortes] = useState<CortesNuevos[]>([]);
+  const { reses, loadingReses, refetchReses } = useHistorialReses();
+  const { cortesFiltrados, filtrarCortes, limpiarCortes, loadingCortes } = useFiltrarCortes();
   //TODO: Variables de calculo
   const pesoTotal = resActual?.pesoKg ?? 0;
   const costoTotal = resActual ? resActual?.pesoKg * resActual?.precioPorKg : 0;
@@ -62,12 +66,14 @@ const Desposte: React.FC<DesposteProps> = () => {
   const progresoAsignado = Math.min((totalKgAsignados / pesoTotal) * 100, 100);
   const ingresoTotal = cortes.reduce((sum, c) => sum + (c.kg || 0) * (c.precio_por_kg || 0), 0);
   const costoRealPorKg = totalKgAsignados > 0 ? costoTotal / totalKgAsignados : 0;
-  const { guardarDesposte, loading } = useGuardarDesposte();
+  const { guardarDesposte, loadingDesposte } = useGuardarDesposte();
 
   //TODO: Esto lo que hace es formatear la fecha que viene de supabase a algo entendible
   const formatearFecha = (fechaTexto: any) => {
-    if (!fechaTexto) return '-/-';
+    if (!fechaTexto || fechaTexto === '-/-') return '-/-';
+
     const fecha = new Date(fechaTexto);
+    if (isNaN(fecha.getTime())) return '-/-';
 
     return fecha.toLocaleDateString('es-AR', {
       day: '2-digit',
@@ -107,30 +113,28 @@ const Desposte: React.FC<DesposteProps> = () => {
 
   useEffect(() => {
     if (resActual) {
-      localStorage.setItem('desposte_resActual', JSON.stringify(resActual))
+      localStorage.setItem('desposte_resActual_${user.id}', JSON.stringify(resActual));
+    }
+  }, [resActual]);
+
+  useEffect(() => {
+    if (resActual?.id) {
+      filtrarCortes(resActual.id)
     }
   }, [resActual])
 
   useEffect(() => {
-    if (cortes.length > 0) {
-      localStorage.setItem('desposte_cortes', JSON.stringify(cortes))
-    }
-  }, [cortes])
+    const resGuardada = localStorage.getItem('desposte_resActual_${user.id}');
 
-  useEffect(() => {
-    const resGuardada = localStorage.getItem('desposte_resActual')
-    const cortesGuardados = localStorage.getItem('desposte_cortes')
-
-    if (resGuardada) setResActual(JSON.parse(resGuardada))
-    if (cortesGuardados) setCortes(JSON.parse(cortesGuardados))
+    if (resGuardada) setResActual(JSON.parse(resGuardada));
   }, []);
 
   const finalizarDesposte = () => {
-    localStorage.removeItem('desposte_resActual')
-    localStorage.removeItem('desposte_cortes')
-    setResActual(null)
-    setCortes([{ id: nextId++, nombre: "Asado", kg: 0, precio_por_kg: 0 }])
-  }
+    localStorage.removeItem('desposte_resActual_${user.id}');
+    localStorage.removeItem('desposte_corte_${user.id}');
+    setResActual(null);
+    limpiarCortes();
+  };
 
   const addCorte = (nombre = "") => {
     setCortes((prev) => [...prev, { id: nextId++, nombre, kg: 0, precio_por_kg: 0 }]);
@@ -152,18 +156,21 @@ const Desposte: React.FC<DesposteProps> = () => {
         id: c.id,
         nombre: c.nombre,
         kg: c.kgTotal,
-        precio_por_kg: c.precioPorKg
+        precio_por_kg: c.precioPorKg,
       })))
+    } else {
+      setCortes([{ id: nextId++, nombre: "Asado", kg: 0, precio_por_kg: 0 }]);
     };
-  });
+  }, [cortesFiltrados]);
 
   const handleIniciarDesposte = (data: ResData) => {
     setResActual(data);
     setDialogOpen(false);
+    refetchReses();
   };
 
   const progresoColor =
-    progresoAsignado > 100 ? "error" : progresoAsignado > 85 ? "warning" : "primary";
+    progresoAsignado > 100 ? "error" : progresoAsignado > 85 ? "success" : "primary";
 
   const BoxTitutloUltimaRes = ({ isMobile = false }) => (
     <Stack sx={{
@@ -189,8 +196,8 @@ const Desposte: React.FC<DesposteProps> = () => {
         textAlign: 'center'
       }}
       >
-        <Typography variant="body2" fontWeight={600} sx={{ fontSize: '1rem' }}>
-          La res ya fue despostada
+        <Typography variant="body2" fontWeight={600} sx={{ fontSize: '1rem', mt: { xs: 1.5, sm: 0, md: 0 } }}>
+          Esta res ya fue despostada
         </Typography>
       </Stack>
     );
@@ -203,6 +210,7 @@ const Desposte: React.FC<DesposteProps> = () => {
       height: "100%",
       overflow: "auto",
       p: { xs: 2, sm: 3, md: 4 },
+      mt: { xs: 1, sm: 0 },
       animation: "slideDown 0.4s ease",
       "@keyframes slideDown": {
         from: {
@@ -217,24 +225,30 @@ const Desposte: React.FC<DesposteProps> = () => {
     }}>
       <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
         <Box>
-          <Typography variant="h5" fontWeight={600}>
-            Desposte
+          <Typography variant="h5" fontWeight={600} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <ContentCutRoundedIcon fontSize='small' sx={{ mr: 1 }} />Desposte
+          </Typography>
+          <Typography variant="body2">
+            Desposta y asigna
           </Typography>
         </Box>
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
+          startIcon={<AddIcon fontSize="small" />}
           onClick={() => setDialogOpen(true)}
-          sx={{ 
-            borderRadius: 2, 
-            fontWeight: 600, 
+          sx={{
+            borderRadius: 3,
+            fontWeight: 600,
             textTransform: "none",
-            '&:hover': {
-              boxShadow: `0 0 10px #fc0000`,
-            }
+            boxShadow: "0 0 16px rgba(252, 0, 0, 0.45)",
+            transition: "box-shadow 0.3s ease, background-color 0.3s ease, transform 0.2s ease",
+            "&:hover": {
+              boxShadow: "none",
+              transform: "translateY(-1px)",
+            },
           }}
         >
-          Nueva res
+          Agregar Nueva res
         </Button>
       </Box>
       <Box mt={3} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -250,18 +264,18 @@ const Desposte: React.FC<DesposteProps> = () => {
         </Box>
       </Box>
       <Stack flexDirection={{ xs: 'column', sm: 'column', md: 'row' }} gap={2} sx={{ mb: 2.2, width: '100%' }}>
-        <Paper variant="outlined" sx={{ borderRadius: 3, boxShadow: 4, width: { xs: '100%', sm: '100%', md: '100%' }, fontSize: '1rem', overflow: 'hidden', backgroundColor: "#141414", border: 'none'}}>
+        <Paper variant="outlined" sx={{ borderRadius: 3, boxShadow: 4, width: { xs: '100%', sm: '100%', md: '100%' }, fontSize: '1rem', overflow: 'hidden', backgroundColor: "#1c1c1c", border: 'none' }}>
           <TableContainer sx={{ maxHeight: 320, minHeight: 100 }}>
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
                 <TableRow sx={{ bgcolor: "black" }}>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Proveedor</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Fecha de compra</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Peso total</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Precio por kg</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Costo total</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Estado</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Cargar res</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Proveedor</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Fecha de compra</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Peso total</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Precio por kg</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Costo total</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Estado</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Cargar res</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -281,8 +295,8 @@ const Desposte: React.FC<DesposteProps> = () => {
                 ) : reses.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} align="center" sx={{ border: 'none' }}>
-                      <Typography variant="body2" fontWeight={500} sx={{ marginLeft: '20px' }}>
-                        Todavía no tenés reses cargadas.
+                      <Typography variant="body2" fontWeight={500} sx={{ marginLeft: { xs: '100px', sm: '100px', md: '320px' }, fontSize: '1rem' }}>
+                        Todavía no tenés reses cargadas. Carga una para verla aquí.
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -314,7 +328,7 @@ const Desposte: React.FC<DesposteProps> = () => {
                             size="small"
                             variant="contained"
                             onClick={() => handleCargarRes(r)}
-                            sx={{ borderRadius: 2, textTransform: 'none', fontSize: '1rem' }}
+                            sx={{ borderRadius: 3, textTransform: 'none', fontSize: '1rem' }}
                           >
                             Cargar
                           </Button>
@@ -330,28 +344,28 @@ const Desposte: React.FC<DesposteProps> = () => {
         <BoxTitutloUltimaRes isMobile={true} />
         <Box display="flex" gap={1} flexWrap="wrap">
           <Stack flexDirection={'row'} gap={1} flexWrap='wrap' sx={{ width: '100%', minWidth: 200 }}>
-            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#141414", minWidth: 200, p: 2 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Proveedor</Typography>
-              <Typography sx={{ fontSize:{xs: '1.2rem'} }}>{resActual?.proveedor || '-/-'}</Typography>
+            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", minWidth: 200, p: 2 }}>
+              <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><LocalShippingRoundedIcon sx={{ mr: 1 }} /> Proveedor</Typography>
+              <Typography sx={{ fontSize: { xs: '1.2rem' } }}>{resActual?.proveedor || '-/-'}</Typography>
             </Paper>
-            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#141414", minWidth: 200, p: 2 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Peso total comprado</Typography>
+            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", minWidth: 202, p: 1 }}>
+              <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><ScaleIcon sx={{ mr: 1 }} /> Peso total comprado</Typography>
               <Typography variant="h6">{resActual?.pesoKg || '-/-'} Kg</Typography>
             </Paper>
-            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#141414", minWidth: 170, p: 2 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Precio por Kg</Typography>
+            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", minWidth: 170, p: 2 }}>
+              <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><PaymentsRoundedIcon sx={{ mr: 1 }} /> Precio/Kg</Typography>
               <Typography variant="h6">
                 {resActual ? formatPesos(resActual?.precioPorKg) : '-/-'}
               </Typography>
             </Paper>
           </Stack>
           <Stack flexDirection={'row'} gap={1} sx={{ width: '100%' }}>
-            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#141414", p: 2 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Costo total</Typography>
+            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", p: 2 }}>
+              <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><ReceiptLongRoundedIcon sx={{ mr: 1 }} /> Costo total</Typography>
               <Typography variant="h6">{formatPesos(costoTotal) || '-/-'}</Typography>
             </Paper>
-            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#141414", p: 2 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Fecha de compra</Typography>
+            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", p: 2 }}>
+              <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><EventRoundedIcon sx={{ mr: 1 }} /> Fecha de compra</Typography>
               <Typography variant="h6">{formatearFecha(resActual?.fecha || '-/-')}</Typography>
             </Paper>
           </Stack>
@@ -364,7 +378,7 @@ const Desposte: React.FC<DesposteProps> = () => {
       </Box>
       <Paper variant="outlined" sx={{ borderRadius: 3, mb: 2, backgroundColor: 'transparent', border: 'none' }}>
         <Stack flexDirection={'row'} gap={1} flexWrap='wrap' sx={{ width: '100%', minWidth: 200, mb: 1.8 }}>
-          <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', borderRadius: 3, border: 'none', backgroundColor: "#141414", boxShadow: 4 }}>
+          <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", boxShadow: 4 }}>
             <Typography variant="body2" sx={{ mb: 1 }}>Kilos asignados</Typography>
             {loadingCortes ? (
               <CircularProgress
@@ -386,7 +400,7 @@ const Desposte: React.FC<DesposteProps> = () => {
               </Typography>
             )}
           </Paper>
-          <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', borderRadius: 3, border: 'none', backgroundColor: "#141414", boxShadow: 4, p: 2 }}>
+          <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", boxShadow: 4, p: 2 }}>
             <Typography variant="body2" sx={{ mb: 1 }}>Merma estimada</Typography>
             {loadingCortes ? (
               <CircularProgress
@@ -436,16 +450,16 @@ const Desposte: React.FC<DesposteProps> = () => {
           Cortes obtenidos
         </Typography>
       </Box>
-      <Paper variant="outlined" sx={{ borderRadius: 3, border: 'none', backgroundColor: "#141414", boxShadow: 4, width: { xs: '100%', sm: '100%', md: '100%' }, fontSize: '1rem', overflow: 'hidden', mb: 2 }}>
+      <Paper variant="outlined" sx={{ borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", boxShadow: 4, width: { xs: '100%', sm: '100%', md: '100%' }, fontSize: '1rem', overflow: 'hidden', mb: 2 }}>
         <TableContainer sx={{ maxHeight: 420, minHeight: 100 }}>
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow sx={{ bgcolor: "black" }}>
-                <TableCell sx={{ fontWeight: 600, backgroundColor: "#141414" }}>Nombre del corte</TableCell>
-                <TableCell sx={{ fontWeight: 600, backgroundColor: "#141414" }}>Kg obtenidos</TableCell>
-                <TableCell sx={{ fontWeight: 600, backgroundColor: "#141414" }}>Precio venta ($/kg)</TableCell>
-                <TableCell sx={{ fontWeight: 600, backgroundColor: "#141414" }}>Ingreso</TableCell>
-                <TableCell sx={{ fontWeight: 600, backgroundColor: "#141414" }}></TableCell>
+                <TableCell sx={{ fontWeight: 600, backgroundColor: "#1c1c1c" }}>Nombre del corte</TableCell>
+                <TableCell sx={{ fontWeight: 600, backgroundColor: "#1c1c1c" }}>Kg obtenidos</TableCell>
+                <TableCell sx={{ fontWeight: 600, backgroundColor: "#1c1c1c" }}>Precio venta ($/kg)</TableCell>
+                <TableCell sx={{ fontWeight: 600, backgroundColor: "#1c1c1c" }}>Ingreso</TableCell>
+                <TableCell sx={{ fontWeight: 600, backgroundColor: "#1c1c1c" }}></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -568,7 +582,7 @@ const Desposte: React.FC<DesposteProps> = () => {
             startIcon={<AddIcon />}
             disabled={resYaDespostada}
             onClick={() => addCorte()}
-            sx={{ mt: 2, textTransform: 'none', fontSize: '0.90rem', borderRadius: 3 }}
+            sx={{ mt: 2, textTransform: 'none', fontSize: '0.90rem', borderRadius: 3, backgroundColor: '#ef44441b' }}
           >
             Agregar corte personalizado
           </Button>
@@ -577,14 +591,14 @@ const Desposte: React.FC<DesposteProps> = () => {
 
       {
         costoRealPorKg > 0 && (
-          <Alert severity="info" sx={{ mb: 2, borderRadius: 3, boxShadow: 4 }}>
+          <Alert severity="info" sx={{ mb: 2, borderRadius: 3, boxShadow: 4, fontSize: '1rem' }}>
             El costo real por kg de esta res es <strong>{formatPesos(costoRealPorKg)}/Kg</strong>.
             Los cortes con precio de venta por debajo de este valor generan pérdida.
           </Alert>
         )
       }
 
-      <Paper variant="outlined" sx={{ p: 2.2, borderRadius: 3, mb: 2, boxShadow: 4, backgroundColor: "#141414", border: 'none' }}>
+      <Paper variant="outlined" sx={{ p: 2.2, borderRadius: 3, mb: { xs: 3.5, sm: 3, md: 0 }, boxShadow: 4, backgroundColor: "#1c1c1c", border: 'none' }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
           <Box>
             <Typography variant="body2" fontWeight={600}>Ingreso potencial total</Typography>
@@ -612,12 +626,23 @@ const Desposte: React.FC<DesposteProps> = () => {
           <Button
             variant="contained"
             size="large"
-            disabled={loading || cortes.length === 0 || resYaDespostada}
+            disabled={loadingDesposte || cortes.length === 0 || resYaDespostada}
             onClick={() => handleGuardar(cortes)}
             startIcon={<CheckCircleOutlineIcon />}
             sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}
           >
-            {loading ? 'Guardando...' : 'Guardar'}
+            {loadingDesposte ? (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <CircularProgress
+                  size={20}
+                  sx={{
+                    color: "#ffffff",
+                    marginRight: "10px"
+                  }}
+                />
+                <span>Guardando...</span>
+              </Box>
+            ) : 'Guardar'}
           </Button>
         </Box>
         <TextoDeDespotada isMobile={true} />
@@ -626,7 +651,9 @@ const Desposte: React.FC<DesposteProps> = () => {
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        PaperProps={{ sx: { borderRadius: 3, minWidth: 320, backgroundColor: '#141414', border: 'none' } }}
+        PaperProps={{ sx: { borderRadius: 3, backgroundColor: '#141414', border: 'none' } }}
+        fullWidth
+        maxWidth="sm"
       >
         <DialogContent sx={{ p: 0, border: 'none' }}>
           <NuevaRes onIniciarDesposte={handleIniciarDesposte} onCancelar={() => setDialogOpen(false)} />

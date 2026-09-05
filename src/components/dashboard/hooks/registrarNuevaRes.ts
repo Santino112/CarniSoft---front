@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { nuevaResService } from "../dashboard.service";
+import { useSnackbar } from "../../../context/SnackbarContext";
+import { useAuth } from "../../auth/context/UseAuth";
 import type { ResData } from "../types";
 
 export const useNuevaRes = (onIniciarDesposte?: (data: ResData) => void) => {
     const [loadingGuardarRes, setLoadingGuardarRes] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const { user } = useAuth();
+    const { showSnackbar } = useSnackbar();
 
     const guardarNuevaRes = async (
         proveedor: string,
@@ -12,13 +15,17 @@ export const useNuevaRes = (onIniciarDesposte?: (data: ResData) => void) => {
         peso: number,
         precio: number
     ) => {
-        setLoadingGuardarRes(true);
-        setError(null);
 
-        const resultado = await nuevaResService(proveedor, fechaCompra, peso, precio);
+        if (!user) {
+            return { success: false, message: 'No hay sesión activa.' }
+        };
+
+        setLoadingGuardarRes(true);
+        console.log('user:', user)
+        const resultado = await nuevaResService(proveedor, fechaCompra, peso, precio, user.id);
 
         if (!resultado.success) {
-            setError(resultado.message);
+            showSnackbar(resultado.message, 'error');
             setLoadingGuardarRes(false);
             return { success: false, message: resultado.message };
         }
@@ -32,8 +39,9 @@ export const useNuevaRes = (onIniciarDesposte?: (data: ResData) => void) => {
         });
 
         setLoadingGuardarRes(false);
+        showSnackbar(resultado.message, 'success');
         return { success: true, message: resultado.message };
     };
 
-    return { guardarNuevaRes, loadingGuardarRes, error };
+    return { guardarNuevaRes, loadingGuardarRes };
 };

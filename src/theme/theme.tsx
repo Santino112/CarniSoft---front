@@ -12,11 +12,23 @@ export const Theme = createTheme({
             main: '#4E342E',
         },
         background: {
-            default: '#232323',
+            default: '#141414',
             paper: '#FFFFFF',
         },
         success: {
             main: '#2E7D32',
         },
-    }
+    },
+    components: {
+        MuiCssBaseline: {
+            styleOverrides: {
+                body: {
+                    backgroundColor: '#141414',
+                    backgroundImage: 'radial-gradient(ellipse at top left, #ef44441b, transparent 100%)',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundAttachment: 'fixed',
+                },
+            },
+        },
+    },
 });

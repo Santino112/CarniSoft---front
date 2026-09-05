@@ -51,6 +51,7 @@ export const SnackbarProvider: React.FC<SnackbarProviderProps> = ({ children }) 
             borderRadius: 4,
             fontWeight: 500,
             boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)',
+            mb: 1,
           }}
         >
           {message}

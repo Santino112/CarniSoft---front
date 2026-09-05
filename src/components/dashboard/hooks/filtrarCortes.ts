@@ -1,20 +1,21 @@
 import { useState } from "react";
 import { filtrarCortesService } from "../dashboard.service";
+import { useSnackbar } from "../../../context/SnackbarContext";
 import type { Corte } from "../types";
 
 export const useFiltrarCortes = () => {
     const [cortesFiltrados, setCortesFiltrados] = useState<Corte[]>([]);
-    const [loadingCortes, setLoadingCortes] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const limpiarCortes = () => setCortesFiltrados([]);
+    const [loadingCortes, setLoadingCortes] = useState(false);
+    const { showSnackbar } = useSnackbar();
 
     const filtrarCortes = async (res_id: string) => {
         setLoadingCortes(true);
-        setError(null);
 
         const resultado = await filtrarCortesService(res_id);
 
         if (!resultado.success) {
-            setError(resultado.message);
+            showSnackbar(resultado.message, 'error');
             setLoadingCortes(false);
             return false;
         }
@@ -23,5 +24,5 @@ export const useFiltrarCortes = () => {
         setLoadingCortes(false);
     };
 
-    return { cortesFiltrados, filtrarCortes, loadingCortes, error };
+    return { cortesFiltrados, filtrarCortes, limpiarCortes, loadingCortes };
 };

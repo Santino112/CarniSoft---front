@@ -12,6 +12,7 @@ import {
 import { useSnackbar } from "../../../../context/SnackbarContext";
 import { useNuevaRes } from "../../hooks/registrarNuevaRes";
 import type { ResData } from "../../types";
+import AddIcon from "@mui/icons-material/Add";
 import ScaleIcon from "@mui/icons-material/Scale";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import StorefrontIcon from "@mui/icons-material/Storefront";
@@ -33,7 +34,7 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte, onCancelar }) =>
 
   const { showSnackbar } = useSnackbar();
   const [isNuevaRes, setIsNuevaRes] = useState(false);
-  const { guardarNuevaRes, loadingGuardarRes } = useNuevaRes(onIniciarDesposte)
+  const { guardarNuevaRes, loadingGuardarRes } = useNuevaRes(onIniciarDesposte);
 
   const peso = parseFloat(pesoKg) || 0;
   const precio = parseFloat(precioPorKg) || 0;
@@ -66,15 +67,15 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte, onCancelar }) =>
   };
 
   return (
-    <Box component='form' onSubmit={handleNuevaRes} sx={{ maxWidth: 560, mx: "auto", p: { xs: 2.3, sm: 4 }, bgcolor: "background.default", border: 'none' }}>
-      <Typography variant="h5" mb={1} fontWeight={600}>
-        Nueva res
+    <Box component='form' onSubmit={handleNuevaRes} sx={{p: { xs: 2.3, sm: 4 }, bgcolor: "#1c1c1c", border: 'none' }}>
+      <Typography variant="h5" mb={1} fontWeight={600} sx={{display: 'flex', alignItems: 'center'}}>
+        <AddIcon fontSize="medium" sx={{mr: 1}}/>Nueva res
       </Typography>
       <Typography variant="body2" mb={2} sx={{ fontSize: '1rem' }}>
         Registrá los datos de la compra para iniciar el desposte.
       </Typography>
       <Divider sx={{ my: 1 }} />
-      <Paper variant="outlined" sx={{ p: 0, borderRadius: 3, mb: 3, bgcolor: "background.default", border: 'none' }}>
+      <Paper variant="outlined" sx={{borderRadius: 3, mb: 3, bgcolor: "#1c1c1c", border: 'none' }}>
         <Typography variant="overline">
           Datos de la compra
         </Typography>
@@ -179,7 +180,7 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte, onCancelar }) =>
           p: 2,
           borderRadius: 3,
           mb: 3,
-          bgcolor: costoTotal > 0 ? "background.default" : "transparent",
+          bgcolor: costoTotal > 0 ? "#111111" : "transparent",
           borderColor: costoTotal > 0 ? "primary.200" : "divider",
           transition: "all 0.2s ease",
         }}

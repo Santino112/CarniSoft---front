@@ -1,26 +1,27 @@
 import { useState } from "react";
 import { guardarDesposteService } from "../dashboard.service";
+import { useSnackbar } from "../../../context/SnackbarContext";
 import type { CortesNuevos } from "../types";
 
 export const useGuardarDesposte = () => {
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const [loadingDesposte, setLoadingDesposte] = useState(false)
+    const { showSnackbar } = useSnackbar();
 
     const guardarDesposte = async (res_id: string, cortes: CortesNuevos[]) => {
-        setLoading(true)
-        setError(null)
+        setLoadingDesposte(true);
 
         const resultado = await guardarDesposteService(res_id, cortes)
 
         if (!resultado.success) {
-            setError(resultado.message);
-            setLoading(false)
-            return false
+            showSnackbar(resultado.message, 'error');
+            setLoadingDesposte(false);
+            return false;
         }
 
-        setLoading(false)
-        return true
+        setLoadingDesposte(false);
+        showSnackbar(resultado.message, 'success');
+        return true;
     }
 
-    return { guardarDesposte, loading, error }
+    return { guardarDesposte, loadingDesposte }
 };

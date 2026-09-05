@@ -4,7 +4,8 @@ import { loginUsuario } from '../auth.service';
 import { registerUsuario } from '../auth.service';
 import { consulta } from '../consulta.service';
 import { useSnackbar } from '../../../context/SnackbarContext';
-import { Box, Card, Button, Typography, TextField, AppBar, Toolbar, InputAdornment, IconButton, CircularProgress, useMediaQuery, useTheme,  } from '@mui/material';
+import { Box, Card, Button, Typography, TextField, AppBar, Toolbar, InputAdornment, IconButton, CircularProgress, Stack, useMediaQuery, useTheme, } from '@mui/material';
+import { traducirError } from '../../../shared/utils/TraducirError';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -19,6 +20,7 @@ export const Login = () => {
     //Variables que toman los datos del registro y login
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [repetirPassword, setRepetirPassword] = useState('');
     //Variables que toman los datos de la consulta - La variable nombre también se usa pára el registro
     const [nombre, setNombre] = useState('');
     const [asunto, setAsunto] = useState('');
@@ -30,7 +32,9 @@ export const Login = () => {
 
     const carniSoft = useRef<HTMLDivElement>(null);
     const consultas = useRef<HTMLDivElement>(null);
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPasswordLogin, setShowPasswordLogin] = useState(false);
+    const [showPasswordNewPassword, setShowPasswordNewPassword] = useState(false);
+    const [showPasswordAgain, setShowPasswordAgain] = useState(false);
     const { showSnackbar } = useSnackbar();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -59,8 +63,16 @@ export const Login = () => {
     };
 
     //Para mostrar o no la contraseña
-    const handleShowPassword = () => {
-        setShowPassword((prev) => !prev);
+    const handleShowPasswordLogin = () => {
+        setShowPasswordLogin((prev) => !prev);
+    };
+
+    const handleShowPasswordNewPassword = () => {
+        setShowPasswordNewPassword((prev) => !prev);
+    };
+
+    const handleShowPasswordAgain = () => {
+        setShowPasswordAgain((prev) => !prev);
     };
 
     //Manejo del registro
@@ -68,13 +80,19 @@ export const Login = () => {
         e.preventDefault();
         setIsLoadingRegister(true);
 
+        if (repetirPassword !== password) {
+            setIsLoadingRegister(false);
+            showSnackbar('Las contraseñas no coinciden', 'error');
+            return;
+        };
+
         const resultado = await registerUsuario(nombre, email, password);
 
         if (!resultado.success) {
             setIsLoadingRegister(false);
             showSnackbar(resultado.message, 'error');
             return;
-        }
+        };
 
         setNombre('');
         setEmail('');
@@ -94,7 +112,7 @@ export const Login = () => {
 
         if (!resultado.success) {
             setIsLoadingLogin(false);
-            showSnackbar(resultado.message, 'error');
+            showSnackbar(traducirError(resultado.message), 'error');
             return;
         };
 
@@ -127,6 +145,21 @@ export const Login = () => {
         showSnackbar('Consulta enviada con éxito', 'success');
     };
 
+    const BoxTituloLlenarFormulario = ({ isMobile = false }) => (
+        <Stack sx={{
+            display: isMobile ? { xs: "flex", md: "none" } : { xs: "none", md: "flex" },
+            width: isMobile ? "100%" : "auto",
+            m: 0,
+            position: 'relative',
+            top: '5px'
+        }}
+        >
+            <Typography variant="overline" sx={{ color: "primary.main", letterSpacing: 3, fontWeight: 600, fontSize: '0.80rem' }}>
+                Llenar formulario
+            </Typography>
+        </Stack>
+    );
+
     return (
         <>
             <Box
@@ -137,7 +170,6 @@ export const Login = () => {
                     justifyContent: "center",
                     minHeight: "100dvh",
                     width: "100%",
-                    bgcolor: "background.default",
                     px: { xs: 2, sm: 4 },
                     py: { xs: 4, sm: 0 },
                 }}
@@ -145,7 +177,7 @@ export const Login = () => {
                 <AppBar
                     elevation={0}
                     sx={{
-                        backgroundColor: "#141414",
+                        backgroundColor: "#1c1c1c",
                         backdropFilter: 'blur(16px)',
                         boxShadow: 4,
                         p: 0.35
@@ -158,7 +190,6 @@ export const Login = () => {
                         justifyContent: "space-between",
                         alignItems: "center",
                         px: { xs: 0, md: 6 },
-                        py: 0.5
                     }}>
                         <Box
                             component="img"
@@ -198,7 +229,7 @@ export const Login = () => {
                                     "&:hover": { backgroundColor: "#454546" },
                                 }}
                             >
-                                Consultas
+                                Contacto
                             </Button>
                         </Box>
                     </Toolbar>
@@ -209,7 +240,9 @@ export const Login = () => {
                         flexDirection: { xs: "column", md: "row" },
                         width: "100%",
                         maxWidth: { xs: 440, md: 900, lg: 1000 },
-                        minHeight: { md: 560 },
+                        height: 'auto',
+                        minHeight: { md: 525, lg: 550 },
+                        maxHeight: { md: '85dvh' },
                         borderRadius: 3,
                         overflow: "hidden",
                         boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
@@ -235,6 +268,7 @@ export const Login = () => {
                                 flexDirection: "column",
                                 alignItems: "center",
                                 justifyContent: "center",
+                                backgroundColor: '#1c1c1c'
                             }}
                         >
                             <Box
@@ -258,13 +292,13 @@ export const Login = () => {
                             alignItems: "center",
                             justifyContent: "center",
                             p: { xs: 3, sm: 5 },
-                            backgroundColor: "#141414",
+                            backgroundColor: "#1c1c1c",
                             borderRadius: 0,
                         }}
                     >
                         {!isLogin ? (
                             <>
-                                <Box sx={{ width: "100%", maxWidth: 360, mb: 1 }}>
+                                <Box sx={{ width: "100%", maxWidth: 360, mb: 2.3 }}>
                                     <Typography variant="h5"
                                         sx={{
                                             textAlign: "center",
@@ -366,7 +400,7 @@ export const Login = () => {
                                     >
                                         <TextField
                                             placeholder='Contraseña'
-                                            type={showPassword ? "text" : "password"}
+                                            type={showPasswordNewPassword ? "text" : "password"}
                                             fullWidth
                                             value={password}
                                             sx={{
@@ -386,8 +420,8 @@ export const Login = () => {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", color: "#ffffff" }}>
-                                                            <IconButton onClick={handleShowPassword}>
-                                                                {showPassword ? <VisibilityIcon sx={{ color: "#ffffff" }} /> : <VisibilityOffRoundedIcon sx={{ color: "#ffffff" }} />}
+                                                            <IconButton onClick={handleShowPasswordNewPassword}>
+                                                                {showPasswordNewPassword ? <VisibilityIcon sx={{ color: "#ffffff" }} /> : <VisibilityOffRoundedIcon sx={{ color: "#ffffff" }} />}
                                                             </IconButton>
                                                         </Box>
                                                     </InputAdornment>
@@ -406,15 +440,15 @@ export const Login = () => {
                                     >
                                         <TextField
                                             placeholder='Repetir contraseña'
-                                            type={showPassword ? "text" : "password"}
+                                            type={showPasswordAgain ? "text" : "password"}
                                             fullWidth
-                                            value={password}
+                                            value={repetirPassword}
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
                                                     borderRadius: 3,
                                                 }
                                             }}
-                                            onChange={(e: any) => setPassword(e.target.value)}
+                                            onChange={(e: any) => setRepetirPassword(e.target.value)}
                                             InputProps={{
                                                 startAdornment: (
                                                     <InputAdornment position="start">
@@ -426,8 +460,8 @@ export const Login = () => {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", color: "#ffffff" }}>
-                                                            <IconButton onClick={handleShowPassword}>
-                                                                {showPassword ? <VisibilityIcon sx={{ color: "#ffffff" }} /> : <VisibilityOffRoundedIcon sx={{ color: "#ffffff" }} />}
+                                                            <IconButton onClick={handleShowPasswordAgain}>
+                                                                {showPasswordAgain ? <VisibilityIcon sx={{ color: "#ffffff" }} /> : <VisibilityOffRoundedIcon sx={{ color: "#ffffff" }} />}
                                                             </IconButton>
                                                         </Box>
                                                     </InputAdornment>
@@ -444,7 +478,7 @@ export const Login = () => {
                                             justifyContent: "center",
                                         }}
                                     >
-                                        <Button variant='contained' type='submit' disabled={isLoadingRegister} fullWidth sx={{textTransform: 'none', fontSize: '1rem', borderRadius: 3}}>
+                                        <Button variant='contained' type='submit' disabled={isLoadingRegister} fullWidth sx={{ textTransform: 'none', fontSize: '1rem', borderRadius: 3 }}>
                                             {isLoadingRegister ? (
                                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                     <CircularProgress
@@ -476,7 +510,7 @@ export const Login = () => {
                                                 "&:hover": { textDecoration: "underline" },
                                             }}
                                         >
-                                            Ingresá
+                                            Ingresá aquí
                                         </Box>
                                     </Typography>
                                 </Box>
@@ -554,7 +588,7 @@ export const Login = () => {
                                     >
                                         <TextField
                                             placeholder='Contraseña'
-                                            type={showPassword ? "text" : "password"}
+                                            type={showPasswordLogin ? "text" : "password"}
                                             fullWidth
                                             value={password}
                                             sx={{
@@ -574,8 +608,8 @@ export const Login = () => {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", color: "#ffffff" }}>
-                                                            <IconButton onClick={handleShowPassword}>
-                                                                {showPassword ? <VisibilityIcon sx={{ color: "#ffffff" }} /> : <VisibilityOffRoundedIcon sx={{ color: "#ffffff" }} />}
+                                                            <IconButton onClick={handleShowPasswordLogin}>
+                                                                {showPasswordLogin ? <VisibilityIcon sx={{ color: "#ffffff" }} /> : <VisibilityOffRoundedIcon sx={{ color: "#ffffff" }} />}
                                                             </IconButton>
                                                         </Box>
                                                     </InputAdornment>
@@ -625,7 +659,7 @@ export const Login = () => {
                                             "&:hover": { textDecoration: "underline" },
                                         }}
                                     >
-                                        Registrate
+                                        Registrate aquí
                                     </Box>
                                 </Typography>
                             </>
@@ -642,7 +676,6 @@ export const Login = () => {
                     justifyContent: "center",
                     minHeight: "100dvh",
                     width: "100%",
-                    bgcolor: "background.default",
                     px: { xs: 2, sm: 4 },
                     py: { xs: 4, sm: 0 },
                 }}
@@ -655,12 +688,14 @@ export const Login = () => {
                         width: "100%",
                         p: { xs: 3, md: 5 },
                         maxWidth: { xs: 440, md: 900, lg: 1000 },
-                        minHeight: { md: 560 },
-                        gap: 3,
+                        height: 'auto',
+                        minHeight: { xl: 400, md: 525, lg: 550 },
+                        maxHeight: { md: '80dvh' },
+                        gap: 2,
                         borderRadius: 4,
                         overflow: "hidden",
                         boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
-                        backgroundColor: "#141414",
+                        backgroundColor: "#1c1c1c",
                     }}
                 >
                     <Typography
@@ -669,6 +704,7 @@ export const Login = () => {
                             color: "primary.main",
                             letterSpacing: 3,
                             fontWeight: 600,
+                            fontSize: '0.80rem'
                         }}>
                         Plataforma de gestión
                     </Typography>
@@ -678,13 +714,19 @@ export const Login = () => {
                             fontWeight: 700,
                             lineHeight: 1.2,
                         }}>
-                        ¿Qué es <Box component="span" sx={{ color: "primary.main" }}>CarniSoft?</Box>
+                        ¿Qué es <Box component="span" sx={{
+                            fontWeight: 'bold',
+                            backgroundImage: 'linear-gradient(90deg, #ff0101 0%, #ffffff 100%)',
+                            backgroundClip: 'text',
+                            WebkitBackgroundClip: 'text',
+                            color: 'transparent',
+                        }}>CarniSoft?</Box>
                     </Typography>
                     <Typography variant='h6'
                         sx={{
-                            color: "rgba(255,255,255,0.7)",
+                            color: "#ffffff",
                             lineHeight: 1.8,
-                            fontWeight: 400,
+                            fontSize: { xs: '1.1rem', md: '1.3rem' }
                         }}>
                         CarniSoft es una aplicación web para carnicerías que permite registrar desposte de animales,
                         calcular automáticamente ganancias y pérdidas, llevar historial de precios y acceder a reportes
@@ -700,7 +742,7 @@ export const Login = () => {
                             <Box key={item.texto} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <Box sx={{
                                     fontSize: '1.2rem',
-                                    bgcolor: 'rgba(255,255,255,0.05)',
+                                    bgcolor: 'rgba(124, 124, 124, 0.3)',
                                     borderRadius: '50%',
                                     width: 40,
                                     height: 40,
@@ -711,7 +753,7 @@ export const Login = () => {
                                 }}>
                                     {item.icon}
                                 </Box>
-                                <Typography sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem' }}>
+                                <Typography sx={{ color: '#ffffff', fontSize: '1rem' }}>
                                     {item.texto}
                                 </Typography>
                             </Box>
@@ -728,7 +770,7 @@ export const Login = () => {
                     justifyContent: "center",
                     minHeight: "50dvh",
                     width: "100%",
-                    backgroundColor: "#141414",
+                    backgroundColor: "#1c1c1c",
                     borderRadius: 4
                 }}
             >
@@ -739,7 +781,7 @@ export const Login = () => {
                         justifyContent: 'center',
                         width: "100%",
                         flexGrow: 1,
-                        gap: 3,
+                        gap: 2,
                         overflow: "hidden",
                         boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
                         p: { xs: 3, md: 6 },
@@ -750,15 +792,21 @@ export const Login = () => {
                         flexDirection: "column",
                         justifyContent: "center",
                         width: { xs: '100%', md: '50%' },
-                        gap: 3,
+                        gap: 2,
                     }}>
-                        <Typography variant="overline" sx={{ color: "primary.main", letterSpacing: 3, fontWeight: 600 }}>
-                            Contacto
+                        <Typography variant="overline" sx={{ color: "primary.main", letterSpacing: 3, fontWeight: 600, fontSize: '0.80rem' }}>
+                            Contacto y consultas
                         </Typography>
                         <Typography variant="h4" sx={{ color: "white", fontWeight: 700, lineHeight: 1.3 }}>
-                            ¿Querés saber más sobre <Box component="span" sx={{ color: "primary.main" }}>CarniSoft?</Box>
+                            ¿Querés saber más sobre <Box component="span" sx={{
+                                fontWeight: 'bold',
+                                backgroundImage: 'linear-gradient(90deg, #ff0101 0%, #ffffff 100%)',
+                                backgroundClip: 'text',
+                                WebkitBackgroundClip: 'text',
+                                color: 'transparent',
+                            }}>CarniSoft?</Box>
                         </Typography>
-                        <Typography variant="body1" sx={{ color: "rgba(255,255,255,0.7)", lineHeight: 1.8 }}>
+                        <Typography variant="body1" sx={{ color: "#ffffff", lineHeight: 1.8, fontSize: { xs: '1.1rem', md: '1.2rem' } }}>
                             Completá el formulario y te respondo a la brevedad. También podés escribirme directamente por WhatsApp o email.
                         </Typography>
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -768,11 +816,12 @@ export const Login = () => {
                             ].map((item) => (
                                 <Box key={item.texto} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                     <Typography sx={{ fontSize: '1.2rem' }}>{item.icon}</Typography>
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.8)' }}>{item.texto}</Typography>
+                                    <Typography sx={{ color: '#ffffff' }}>{item.texto}</Typography>
                                 </Box>
                             ))}
                         </Box>
                     </Box>
+                    <BoxTituloLlenarFormulario isMobile={true} />
                     <Box
                         component='form'
                         onSubmit={handleConsulta}
@@ -783,6 +832,7 @@ export const Login = () => {
                             gap: 2,
                             justifyContent: 'center',
                         }}>
+                        <BoxTituloLlenarFormulario isMobile={false} />
                         <TextField
                             placeholder='Nombre'
                             type='text'

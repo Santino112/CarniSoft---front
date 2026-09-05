@@ -28,8 +28,9 @@ import {
 import { useHistorialReses } from "../../hooks/historialReses";
 import { useFiltrarCortes } from "../../hooks/filtrarCortes";
 import { useRegistrarVenta } from "../../hooks/registrarVenta";
+import { useSnackbar } from "../../../../context/SnackbarContext";
 import type { Corte } from "../../types";
-import AddIcon from "@mui/icons-material/Add";
+import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded';
 import SavingsRoundedIcon from '@mui/icons-material/SavingsRounded';
 import AccountBalanceWalletRoundedIcon from '@mui/icons-material/AccountBalanceWalletRounded';
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
@@ -37,6 +38,9 @@ import TrendingDownRoundedIcon from '@mui/icons-material/TrendingDownRounded';
 import ListAltRoundedIcon from '@mui/icons-material/ListAltRounded';
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import LocalShippingRoundedIcon from '@mui/icons-material/LocalShippingRounded';
+import TrackChangesRoundedIcon from '@mui/icons-material/TrackChangesRounded';
+import ScaleIcon from "@mui/icons-material/Scale";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 const DIAS_ALERTA = 2;
 const DIAS_CRITICO = 4;
@@ -46,11 +50,13 @@ const Seguimiento = ({ }) => {
   const [selectedCorte, setSelectedCorte] = useState<Corte | null>(null);
   const [kgVenta, setKgVenta] = useState("");
   const [res, setRes] = useState('');
-  const { reses } = useHistorialReses();
+  const { reses } = useHistorialReses(true);
   const resSeleccionada = reses.find(r => r.id === res);
   const { cortesFiltrados, filtrarCortes, loadingCortes } = useFiltrarCortes();
-  const { registrarVentaRealizada } = useRegistrarVenta();
+  const { registrarVentaRealizada, loadingVenta } = useRegistrarVenta();
+  const { showSnackbar } = useSnackbar();
   let [hayResSeleccionada, setHayResSeleccionada] = useState(false);
+  const todosAgotados = cortesFiltrados.every(c => c.kgVendido >= c.kgTotal)
 
   const costoTotal = (resSeleccionada?.peso_total ?? 0) * (resSeleccionada?.precio_kg ?? 0);
   const cantidadDeCortes = cortesFiltrados.length;
@@ -83,19 +89,38 @@ const Seguimiento = ({ }) => {
 
   const estadoChipConDias = (c: Corte) => {
     const estado = getEstado(c);
+
     const labels: Record<string, string> = {
       agotado: "Agotado",
       activo: "Activo",
       lento: `${c.diasSinMovimiento}d sin mover`,
       critico: `${c.diasSinMovimiento}d sin mover`,
     };
+
     const colors: Record<string, "success" | "warning" | "error" | "default"> = {
       agotado: "success",
       activo: "default",
       lento: "warning",
       critico: "error",
     };
-    return <Chip label={labels[estado]} color={colors[estado]} size="medium" />;
+
+    const customStyles: Record<string, object> = {
+      activo: {
+        bgcolor: 'rgba(34, 197, 94, 0.15)',
+        color: '#4ade80',
+        border: '1px solid rgba(34, 197, 94, 0.3)',
+        fontWeight: 600,
+      },
+    };
+
+    return (
+      <Chip
+        label={labels[estado]}
+        color={colors[estado]}
+        size="medium"
+        sx={customStyles[estado]}
+      />
+    );
   };
 
   const handleAbrirVenta = (c: Corte) => {
@@ -108,6 +133,11 @@ const Seguimiento = ({ }) => {
     if (!selectedCorte) return;
     const kg = parseFloat(kgVenta) || 0;
     if (kg <= 0) return;
+
+    if (kg > selectedCorte.kgRestante) {
+      showSnackbar(`No podes vender más de ${selectedCorte.kgRestante} Kg disponbles.`, 'error');
+      return;
+    }
 
     await registrarVentaRealizada(selectedCorte.id, kg, selectedCorte.precioPorKg, new Date().toISOString().split('T')[0]);
 
@@ -169,7 +199,7 @@ const Seguimiento = ({ }) => {
           label="Reses compradas"
           onChange={handleChange}
           sx={{
-            backgroundColor: "#141414",
+            backgroundColor: "#1c1c1c",
             color: "#ffffff",
             width: "100%",
             borderRadius: 3,
@@ -193,13 +223,13 @@ const Seguimiento = ({ }) => {
           MenuProps={{
             PaperProps: {
               sx: {
-                backgroundColor: "#141414",
+                backgroundColor: "#1c1c1c",
                 color: "#f4f4f5",
                 borderRadius: 3,
                 marginTop: 1,
                 maxHeight: 300,
                 maxWidth: "calc(100vw - 32px)",
-                border: "1px solid #141414",
+                border: "1px solid #1c1c1c",
                 boxShadow:
                   4,
                 "& .MuiList-root": {
@@ -253,6 +283,22 @@ const Seguimiento = ({ }) => {
     </Stack>
   );
 
+  const BoxTitutloDatosSeguimiento = ({ isMobile = false }) => (
+    <Stack sx={{
+      display: isMobile ? { xs: "flex", md: "none" } : { xs: "none", md: "flex" },
+      width: isMobile ? "100%" : "auto",
+      m: 0,
+      position: 'relative',
+      top: '17px',
+      left: '2px'
+    }}
+    >
+      <Typography variant="overline" fontWeight={600}>
+        Control de progreso
+      </Typography>
+    </Stack>
+  );
+
   return (
     <Box sx={{
       flexGrow: 1,
@@ -260,7 +306,7 @@ const Seguimiento = ({ }) => {
       height: "100%",
       overflow: "auto",
       p: { xs: 2, sm: 3, md: 4 },
-      mt: 1,
+      mt: { xs: 1, sm: 0 },
       animation: "slideDown 0.4s ease",
       "@keyframes slideDown": {
         from: {
@@ -275,8 +321,8 @@ const Seguimiento = ({ }) => {
     }}>
       <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
         <Box>
-          <Typography variant="h5" fontWeight={600}>
-            Seguimiento
+          <Typography variant="h5" fontWeight={600} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <TrackChangesRoundedIcon fontSize='small' sx={{ mr: 1 }} />Seguimiento
           </Typography>
           <Typography variant="body2">
             Res del {formatearFecha(resSeleccionada?.fecha_compra)} | Día {diasDesdeCompra}
@@ -285,30 +331,47 @@ const Seguimiento = ({ }) => {
         <ActionSelect isMobile={false} />
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
+          startIcon={<PointOfSaleRoundedIcon />}
           onClick={() => setDialogOpen(true)}
-          sx={{ borderRadius: 2, fontWeight: 600, textTransform: "none" }}
+          sx={{
+            borderRadius: 3,
+            fontWeight: 600,
+            textTransform: "none",
+            boxShadow: "0 0 16px rgba(252, 0, 0, 0.45)",
+            transition: "box-shadow 0.3s ease, background-color 0.3s ease, transform 0.2s ease",
+            "&:hover": {
+              boxShadow: "none",
+              transform: "translateY(-1px)",
+            },
+          }}
         >
           Registrar venta
         </Button>
       </Box>
       <ActionSelect isMobile={true} />
-      <Box mt={2}>
-        <Typography variant="overline" fontWeight={600}>
-          Cortes asociados a la res seleccionada
-        </Typography>
+      <Box mt={3} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="overline" fontWeight={600}>
+            Cortes asociados a la res seleccionada
+          </Typography>
+        </Box>
+        <Box sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>
+          <Typography variant="overline" fontWeight={600}>
+            Control de progreso
+          </Typography>
+        </Box>
       </Box>
       <Stack flexDirection={{ xs: 'column', sm: 'column', md: 'row' }} gap={2} sx={{ mb: 3, width: '100%' }}>
-        <Paper variant="outlined" sx={{ borderRadius: 3, boxShadow: 4, border: 'none', width: { xs: '100%', sm: '100%', md: '100%' }, fontSize: '1rem', overflow: 'hidden', bgcolor: "#141414" }}>
+        <Paper variant="outlined" sx={{ borderRadius: 3, boxShadow: 4, border: 'none', width: '100%', fontSize: '1rem', overflow: 'hidden', bgcolor: "#1c1c1c" }}>
           <TableContainer sx={{ maxHeight: 320, minHeight: 100 }}>
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
                 <TableRow sx={{ bgcolor: "black" }}>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Nombre del corte</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Kg asignados</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Precio por kg</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Proveedor</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Fecha de desposte</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Nombre del corte</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Kg asignados</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Precio por kg</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Proveedor</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Fecha de desposte</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -328,7 +391,7 @@ const Seguimiento = ({ }) => {
                 ) : !hayResSeleccionada ? (
                   <TableRow>
                     <TableCell colSpan={5} align="center" sx={{ border: 'none' }}>
-                      <Typography variant="body2" fontWeight={500} sx={{ marginLeft: '20px' }}>
+                      <Typography variant="body2" fontWeight={500} sx={{ marginLeft: '20px', fontSize: '1rem' }}>
                         No hay una res seleccionada.
                       </Typography>
                     </TableCell>
@@ -360,9 +423,10 @@ const Seguimiento = ({ }) => {
             </Table>
           </TableContainer>
         </Paper>
+        <BoxTitutloDatosSeguimiento isMobile={true} />
         <Box display="flex" gap={1} flexWrap="wrap">
           <Stack flexDirection={'row'} gap={1} sx={{ width: '100%' }}>
-            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', borderRadius: 3, bgcolor: "#141414", border: 'none', boxShadow: 4 }}>
+            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', borderRadius: 3, bgcolor: "#1c1c1c", border: 'none', boxShadow: 4 }}>
               <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><SavingsRoundedIcon sx={{ mr: 1 }} />Recuperado</Typography>
               {loadingCortes ? (
                 <CircularProgress
@@ -380,7 +444,7 @@ const Seguimiento = ({ }) => {
                 <Typography variant="h5" fontWeight={700}>-/-</Typography>
               )}
             </Paper>
-            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', minWidth: 140, p: 2, borderRadius: 3, bgcolor: "#141414", border: 'none', boxShadow: 4 }}>
+            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', minWidth: 140, p: 2, borderRadius: 3, bgcolor: "#1c1c1c", border: 'none', boxShadow: 4 }}>
               <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><AccountBalanceWalletRoundedIcon sx={{ mr: 1 }} />Por vender</Typography>
               {loadingCortes ? (
                 <CircularProgress
@@ -409,7 +473,7 @@ const Seguimiento = ({ }) => {
                 minWidth: 140,
                 p: 2,
                 borderRadius: 3,
-                bgcolor: "#141414", border: 'none',
+                bgcolor: "#1c1c1c", border: 'none',
                 boxShadow: superoPuntoEquilibrio && ingresoRecuperado !== 0 && hayResSeleccionada
                   ? (theme) => `0 0 12px ${theme.palette.success.main}`
                   : 4,
@@ -449,7 +513,7 @@ const Seguimiento = ({ }) => {
                 </Typography>
               )}
             </Paper>
-            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', minWidth: 140, p: 2, borderRadius: 3, bgcolor: "#141414", border: 'none', boxShadow: 4 }}>
+            <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', minWidth: 140, p: 2, borderRadius: 3, bgcolor: "#1c1c1c", border: 'none', boxShadow: 4 }}>
               <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><ListAltRoundedIcon sx={{ mr: 1 }} />Num. de cortes</Typography>
               {loadingCortes ? (
                 <CircularProgress
@@ -475,7 +539,7 @@ const Seguimiento = ({ }) => {
         p: 2.5,
         borderRadius: 3,
         mb: { xs: 2, sm: 2, md: 2.5 },
-        bgcolor: "#141414",
+        bgcolor: "#1c1c1c",
         border: 'none',
         boxShadow: superoPuntoEquilibrio && ingresoRecuperado !== 0 && hayResSeleccionada
           ? (theme) => `0 0 12px ${theme.palette.success.main}`
@@ -504,7 +568,7 @@ const Seguimiento = ({ }) => {
           sx={{ height: 10, borderRadius: 5 }}
         />
         {superoPuntoEquilibrio && ingresoRecuperado !== 0 && hayResSeleccionada && (
-          <Typography variant="caption" color="success.main" mt={1} display="block">
+          <Typography variant="caption" fontWeight={600} color="success.main" mt={1} display="block" sx={{ fontSize: '1rem', mt: 1.5 }}>
             Ya cubriste el costo de la res. Todo lo que vendas de acá en adelante es considerado ganancia.
           </Typography>
         )}
@@ -516,7 +580,7 @@ const Seguimiento = ({ }) => {
             variant="filled"
             severity="warning"
             icon={<WarningAmberIcon />}
-            sx={{ mb: 2, borderRadius: 3, boxShadow: 4 }}
+            sx={{ mb: 2, borderRadius: 3, boxShadow: 4, fontSize: '1rem' }}
           >
             {cortesConAlerta.map((c) => c.nombre).join(", ")}{" "}
             {cortesConAlerta.length === 1 ? "lleva" : "llevan"} varios días sin venderse.
@@ -525,22 +589,22 @@ const Seguimiento = ({ }) => {
         )}
       </Box>
 
-      <Box px={1} mt={2}>
+      <Box px={0.25} mt={2}>
         <Typography variant="overline" fontWeight={600}>
           Estado por corte
         </Typography>
       </Box>
-      <Paper variant="outlined" sx={{ borderRadius: 3, overflow: "hidden", bgcolor: "#141414", border: 'none', boxShadow: 4, minHeight: 100, mb: { xs: 3, sm: 3, md: 2 } }}>
+      <Paper variant="outlined" sx={{ borderRadius: 3, overflow: "hidden", bgcolor: "#1c1c1c", border: 'none', boxShadow: 4, minHeight: 100, mb: { xs: 3.7, sm: 3, md: 2 } }}>
         <TableContainer sx={{ maxHeight: 600, minHeight: 200 }}>
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow sx={{ bgcolor: "black" }}>
-                <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Corte</TableCell>
-                <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Cantidad vendida</TableCell>
-                <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Kg que restan</TableCell>
-                <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Ingreso total</TableCell>
-                <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Estado</TableCell>
-                <TableCell sx={{ fontWeight: 600, bgcolor: "#141414" }} align="center">Acción</TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Corte</TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Cantidad vendida</TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Kg que restan</TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Ingreso total</TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Estado</TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Acción</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -560,7 +624,7 @@ const Seguimiento = ({ }) => {
               ) : !hayResSeleccionada ? (
                 <TableRow>
                   <TableCell colSpan={5} align="center" sx={{ border: 'none' }}>
-                    <Typography variant="body2" fontWeight={500} sx={{ marginLeft: '65px' }}>
+                    <Typography variant="body2" fontWeight={500} sx={{ marginLeft: '65px', fontSize: '1rem' }}>
                       No hay una res seleccionada.
                     </Typography>
                   </TableCell>
@@ -592,7 +656,7 @@ const Seguimiento = ({ }) => {
                       </TableCell>
                       <TableCell align="center" sx={{ border: 'none' }}>
                         {!agotado ? (
-                          <Typography color="text.secondary">
+                          <Typography color="body2">
                             Restan {c.kgRestante.toFixed(1)} kg
                           </Typography>
                         ) : (
@@ -613,12 +677,12 @@ const Seguimiento = ({ }) => {
                             size="small"
                             variant="contained"
                             onClick={() => handleAbrirVenta(c)}
-                            sx={{ borderRadius: 2, textTransform: 'none', fontSize: '1rem' }}
+                            sx={{ borderRadius: 3, textTransform: 'none', fontSize: '1rem' }}
                           >
                             Vender
                           </Button>
                         ) : (
-                          <Typography variant="body2" fontWeight={500}>Ya vendiste todo</Typography>
+                          <Typography variant="body2" fontWeight={500}>Ya vendiste todo el corte</Typography>
                         )}
                       </TableCell>
                     </TableRow>
@@ -633,35 +697,54 @@ const Seguimiento = ({ }) => {
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        PaperProps={{ sx: { borderRadius: 3, bgcolor: "background.default", border: 'none' } }}
+        PaperProps={{ sx: { borderRadius: 3, bgcolor: "#1c1c1c", border: 'none' } }}
+        fullWidth
+        maxWidth="xs"
       >
-        <DialogContent sx={{ bgcolor: "background.default", border: 'none' }}>
-          <Typography variant="h5" mb={1} fontWeight={600}>
-            {selectedCorte ? `Vender — ${selectedCorte.nombre}` : "Registrar venta"}
+        <DialogContent sx={{ bgcolor: "#1c1c1c", border: 'none' }}>
+          <Typography variant="h5" mb={1} fontWeight={600} sx={{display: 'flex', alignItems: 'center'}}>
+            {selectedCorte ? (
+              <>
+                Vender — {""}
+                <Box component="span" sx={{ color: "primary.main", ml: 1 }}>
+                   {selectedCorte.nombre}
+                </Box>
+              </>
+            ) : (
+              <>
+                <PointOfSaleRoundedIcon sx={{mr: 1}}/>Registrar venta
+              </>
+            )}
           </Typography>
           {!resSeleccionada ? (
             <Typography variant="body2" fontWeight={500} sx={{ fontSize: '1rem' }}>No hay una res seleccionada. Seleccione una para ver los cortes a vender.</Typography>
           ) : !selectedCorte ? (
-            <Box mb={1} sx={{ mx: "auto", bgcolor: "background.default", border: 'none' }}>
+            <>
               <Typography variant="body2" mb={1} sx={{ color: "#ffffff", fontSize: '1rem' }}>
-                Seleccioná el corte a vender:
+                Seleccioná el corte que quieres vender:
               </Typography>
-              <Box display="flex" flexWrap="wrap" gap={1} sx={{ mt: 2 }}>
-                {cortesFiltrados
-                  .filter((c) => c.kgVendido < c.kgTotal)
-                  .map((c) => (
-                    <Chip
-                      key={c.id}
-                      label={`${c.nombre} (${(c.kgTotal - c.kgVendido).toFixed(1)} kg)`}
-                      onClick={() => setSelectedCorte(c)}
-                      sx={{ cursor: "pointer", bgcolor: "#373737", fontSize: '1rem', boxShadow: 2 }}
-                    />
-                  ))}
-              </Box>
-            </Box>
+              {!todosAgotados ? (
+                <Box mb={1} sx={{ bgcolor: "#111111", border: 'none', p: 1.3, borderRadius: 3 }}>
+                  <Box display="flex" flexWrap="wrap" flexDirection='row' gap={1} >
+                    {cortesFiltrados
+                      .filter((c) => c.kgVendido < c.kgTotal)
+                      .map((c) => (
+                        <Chip
+                          key={c.id}
+                          label={`${c.nombre} (${(c.kgTotal - c.kgVendido).toFixed(1)} kg)`}
+                          onClick={() => setSelectedCorte(c)}
+                          sx={{ cursor: "pointer", bgcolor: "#373737", fontSize: '1rem', boxShadow: 4 }}
+                        />
+                      ))}
+                  </Box>
+                </Box>
+              ) : (
+                <Typography variant="body2" fontWeight={500} sx={{fontSize: '1rem', mt: 2}}>Ya vendiste todos los cortes</Typography>
+              )}
+            </>
           ) : (
-            <Box sx={{ mx: "auto", bgcolor: "background.default", border: 'none', maxWidth: 330 }}>
-              <Typography variant="body2" mb={2}>
+            <Box sx={{ bgcolor: "#1c1c1c", border: 'none', width: '100%' }}>
+              <Typography variant="body2" mb={2} sx={{ fontSize: '1rem' }}>
                 Disponible: {(selectedCorte.kgTotal - selectedCorte.kgVendido).toFixed(1)} Kg ·{" "}
                 {(selectedCorte.precioPorKg)}/Kg
               </Typography>
@@ -672,30 +755,54 @@ const Seguimiento = ({ }) => {
                 onChange={(e) => setKgVenta(e.target.value)}
                 fullWidth
                 autoFocus
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 3,
+                  }
+                }}
                 slotProps={{
                   input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <ScaleIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
                     endAdornment: <InputAdornment position="end">Kg</InputAdornment>,
                   },
                 }}
               />
               {kgVenta && parseFloat(kgVenta) > 0 && (
-                <Typography variant="body2" color="success.main" mt={1} sx={{ fontSize: '1rem' }}>
-                  Ingreso: {formatPesos((parseFloat(kgVenta) * selectedCorte.precioPorKg))}
+                <Typography variant="body2" fontWeight={600} color="success.main" mt={1} sx={{ fontSize: '1rem' }}>
+                  Ingreso por esta venta: {formatPesos((parseFloat(kgVenta) * selectedCorte.precioPorKg))}
                 </Typography>
               )}
             </Box>
           )
           }
         </DialogContent>
-        <DialogActions sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'column', md: 'row' }, justifyContent: 'flex-end', alignItems: 'center', px: 2, pb: 2, bgcolor: "background.default" }}>
+        <DialogActions sx={{ display: 'flex', gap: 1.5, flexDirection: { xs: 'column', sm: 'column', md: 'row' }, alignItems: 'center', px: 2.3, pb: 2.4, bgcolor: "#1c1c1c" }}>
           {selectedCorte && (
             <Button
               variant="contained"
+              endIcon={<ArrowForwardIcon/>}
               onClick={handleConfirmarVenta}
-              disabled={!selectedCorte || !kgVenta || parseFloat(kgVenta) <= 0}
+              disabled={!selectedCorte || !kgVenta || parseFloat(kgVenta) <= 0 || loadingVenta}
               sx={{ borderRadius: 3, color: "#ffffff", textTransform: "none", fontSize: '1rem', width: { xs: '100%', sm: '100%', md: '60%' }, mx: 0.50 }}
             >
-              Confirmar venta
+              {loadingVenta ? (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <CircularProgress
+                    size={20}
+                    sx={{
+                      color: "#ffffff",
+                      marginRight: "10px"
+                    }}
+                  />
+                  <span>Confirmando...</span>
+                </Box>
+              ) : (
+                'Confirmar venta'
+              )}
             </Button>
           )}
           <Button

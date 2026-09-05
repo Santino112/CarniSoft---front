@@ -1,7 +1,6 @@
 import ResponsiveDrawer from "../secciones/panel/SideBar";
 
-export const PanelPrinciapal = () => {
-
+export const PanelPrincipal = () => {
     return (
         <ResponsiveDrawer />
     );

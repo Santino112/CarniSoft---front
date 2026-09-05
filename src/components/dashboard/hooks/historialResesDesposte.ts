@@ -4,7 +4,7 @@ import { useSnackbar } from "../../../context/SnackbarContext";
 import { useAuth } from "../../auth/context/UseAuth";
 import type { ResHistorial } from "../types";
 
-export const useHistorialReses = (soloDespostadas?: boolean) => {
+export const useHistorialResesDesposte = (soloDespostadas?: boolean) => {
     const [reses, setReses] = useState<ResHistorial[]>([]);
     const { user } = useAuth();
     const [loadingReses, setLoadingReses] = useState(false);

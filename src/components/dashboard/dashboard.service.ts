@@ -3,13 +3,14 @@ import { api } from '../../api/httpClient';
 import type { CortesNuevos } from './types';
 
 //TODO: Servicios de la sección de DESPOSTE de la página. 
-export const nuevaResService = async (proveedor: string, fechaCompra: string, pesoTotal: number, precioKg: number) => {
+export const nuevaResService = async (proveedor: string, fechaCompra: string, pesoTotal: number, precioKg: number, userId: string) => {
     try {
         const { data: datosConsulta } = await api.post('/api/desposte/registrarRes', {
             proveedor,
             fechaCompra,
             pesoTotal,
-            precioKg
+            precioKg,
+            userId
         });
         return ({ success: true, message: 'Res registrada con éxito', datosConsulta });
     } catch (error) {
@@ -41,9 +42,11 @@ export const guardarDesposteService = async (res_id: string, cortes: CortesNuevo
 //TODO:///////////////////////////////////////////////////////////////////////////////////////
 
 //TODO: Servicios de la sección de SEGUIMIENTO de la página.
-export const historialResesService = async () => {
+export const historialResesService = async (userId: string, soloDespostadas?: boolean) => {
     try {
-        const { data: datosHistorialReses } = await api.post('/api/seguimiento/historialReses');
+        const { data: datosHistorialReses } = await api.post('/api/seguimiento/historialReses', {
+            userId, soloDespostadas 
+        });
         return ({ success: true, message: 'Historial obtenido con éxito', datosHistorialReses })
     } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -65,12 +68,12 @@ export const filtrarCortesService = async (res_id: string) => {
     }
 };
 
-export const registrarVenta = async (corte_id: string,  kg_vendido: number, precio_kg: number, fecha_venta: string) => {
+export const registrarVenta = async (corte_id: string, kg_vendido: number, precio_kg: number, fecha_venta: string) => {
     try {
-        const { data: datosVentaRealizada } = await api.post('/api/seguimiento/registrarVenta', { corte_id, kg_vendido, precio_kg, fecha_venta});
-        return ({ success: true, message: 'Venta realizada con éxito', datosVentaRealizada});
+        const { data: datosVentaRealizada } = await api.post('/api/seguimiento/registrarVenta', { corte_id, kg_vendido, precio_kg, fecha_venta });
+        return ({ success: true, message: 'Venta realizada con éxito', datosVentaRealizada });
     } catch (error) {
-         if (axios.isAxiosError(error)) {
+        if (axios.isAxiosError(error)) {
             return { success: false, message: error.response?.data?.error ?? 'Error al realizar la venta, intentolo de nuevo.' };
         };
         return { success: false, message: 'Error al realizar la venta, intentolo de nuevo.' };

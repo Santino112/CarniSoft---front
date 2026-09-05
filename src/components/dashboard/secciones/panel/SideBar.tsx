@@ -14,6 +14,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
+import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
+import { useTheme, useMediaQuery } from '@mui/material';
 //Iconos sideBar
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import ContentCutRoundedIcon from '@mui/icons-material/ContentCutRounded';
@@ -21,12 +23,13 @@ import TrackChangesRoundedIcon from '@mui/icons-material/TrackChangesRounded';
 import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
 
-const drawerWidth = 280;
-
 function ResponsiveDrawer() {
     const [paginaActiva, setPaginaActiva] = useState("");
     const [mobileOpen, setMobileOpen] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const theme = useTheme();
+    const isNotebook = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+    const drawerWidth = isNotebook ? 220 : 260;
 
     const handleDrawerClose = () => {
         setIsClosing(true);
@@ -54,7 +57,7 @@ function ResponsiveDrawer() {
                 display: "flex",
                 justifyContent: "flex-start",
                 flexShrink: 0,
-                backgroundColor: "rgb(20, 20, 20)",
+                backgroundColor: "#1c1c1c",
                 border: 'none'
             }}>
                 <Typography variant="h5" noWrap component="div" sx={{
@@ -80,12 +83,11 @@ function ResponsiveDrawer() {
                     width: "100%",
                     minHeight: "250px",
                     p: 1,
-                    backgroundColor: "rgb(20, 20, 20)",
+                    backgroundColor: "#1c1c1c",
                 }}
             >
                 <Button variant='contained' startIcon={<HomeRoundedIcon fontSize='medium' />} fullWidth onClick={() => setPaginaActiva("inicio")} sx={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display: {xs: 'none', sm: 'flex'},
                     justifyContent: "flex-start",
                     backgroundColor: paginaActiva === 'inicio' ? '#454546' : 'transparent',
                     boxShadow: 2,
@@ -99,6 +101,7 @@ function ResponsiveDrawer() {
                     }
                 }}>Inicio</Button>
                 <Button variant='contained' startIcon={<ContentCutRoundedIcon fontSize='small' />} fullWidth onClick={() => setPaginaActiva("desposte")} sx={{
+                    display: {xs: 'none', sm: 'flex'},
                     justifyContent: "flex-start",
                     backgroundColor: paginaActiva === 'desposte' ? '#454546' : 'transparent',
                     boxShadow: 2,
@@ -112,6 +115,7 @@ function ResponsiveDrawer() {
                     }
                 }}>Desposte de la res</Button>
                 <Button variant='contained' startIcon={<TrackChangesRoundedIcon fontSize='small' />} fullWidth onClick={() => setPaginaActiva("seguimiento")} sx={{
+                    display: {xs: 'none', sm: 'flex'},
                     justifyContent: "flex-start",
                     backgroundColor: paginaActiva === 'seguimiento' ? '#454546' : 'transparent',
                     boxShadow: 2,
@@ -128,6 +132,7 @@ function ResponsiveDrawer() {
                     justifyContent: "flex-start",
                     backgroundColor: 'transparent',
                     color: '#ffffff',
+                    mt: {xs: 1, sm: 0},
                     borderRadius: 3,
                     textTransform: 'none',
                     fontSize: '1rem',
@@ -154,12 +159,12 @@ function ResponsiveDrawer() {
             </Box>
             <Box sx={{
                 flexGrow: 1,
-                backgroundColor: "#141414",
+                backgroundColor: "#1c1c1c",
                 border: 'none'
             }}>
             </Box>
-            <Divider sx={{ color: '#141414' }} />
-            <Box sx={{ mt: 'auto', border: 'none', backgroundColor: '#141414' }}>
+            <Divider sx={{ color: '#1c1c1c' }} />
+            <Box sx={{ mt: 'auto', border: 'none', backgroundColor: '#1c1c1c' }}>
                 <MenuUsuario />
             </Box>
         </Box>
@@ -171,6 +176,7 @@ function ResponsiveDrawer() {
             <AppBar
                 position="fixed"
                 sx={{
+                    display: { xs: 'none', sm: 'block' },
                     width: { sm: `calc(100% - ${drawerWidth}px)` },
                     ml: { sm: `${drawerWidth}px` },
                     color: "#ffffff",
@@ -178,9 +184,8 @@ function ResponsiveDrawer() {
             >
                 <Toolbar
                     sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        backgroundColor: "rgb(20, 20, 20)",
+                        display: { xs: 'none', sm: 'block' },
+                        backgroundColor: "#1c1c1c",
                     }}
                 >
                     <IconButton
@@ -238,7 +243,7 @@ function ResponsiveDrawer() {
                 sx={{
                     display: "flex",
                     flexDirection: "column",
-                    height: "100dvh",
+                    minHeight: "100dvh",
                     width: {
                         xs: "100%",
                         sm: "100%",
@@ -246,6 +251,8 @@ function ResponsiveDrawer() {
                     },
                     minWidth: 0,
                     flexGrow: 1,
+                    pb: {xs: 6, md: 0},
+                    mb: 0,
                     overflowY: "hidden",
                     scrollbarWidth: 'thin',
                     scrollbarColor: '#4a4a4a transparent',
@@ -264,7 +271,7 @@ function ResponsiveDrawer() {
                     },
                 }}
             >
-                <Toolbar />
+                <Toolbar sx={{display: { xs: "none", sm: "block" }}}/>
                 <Box
                     sx={{
                         flexGrow: 1,
@@ -281,6 +288,53 @@ function ResponsiveDrawer() {
                     }
                 </Box>
             </Box>
+            {/* Barra inferior fija solo para móviles (xs) */}
+            <Paper
+                sx={{
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1200,
+                    display: { xs: 'block', sm: 'none' },
+                }}
+                elevation={3}
+            >
+                <BottomNavigation
+                    showLabels
+                    value={paginaActiva}
+                    onChange={(_event, newValue) => {
+                        setPaginaActiva(newValue);
+                    }}
+                    sx={{
+                        bgcolor: '#1c1c1c',
+                        '& .Mui-selected': {
+                            color: 'primary.main',
+                        }
+                    }}
+                >
+                    <BottomNavigationAction
+                        label="Inicio"
+                        value="inicio"
+                        icon={<HomeRoundedIcon />}
+                    />
+                    <BottomNavigationAction
+                        label="Desposte"
+                        value="desposte"
+                        icon={<ContentCutRoundedIcon />}
+                    />
+                    <BottomNavigationAction
+                        label="Seguimiento"
+                        value="seguimiento"
+                        icon={<TrackChangesRoundedIcon />}
+                    />
+                    <BottomNavigationAction
+                        label="Menú"
+                        onClick={handleDrawerToggle}
+                        icon={<MenuIcon />}
+                    />
+                </BottomNavigation>
+            </Paper>
         </Box>
     );
 }
