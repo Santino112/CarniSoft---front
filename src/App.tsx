@@ -10,7 +10,7 @@ import logoSinTexto from '../src/assets/CarniSoftLogoSolo.png';
 import './App.css';
 
 const Login = lazy(() =>
-  import('./components/auth/components/Auth').then((module) => ({
+  import('./components/auth/components/auth').then((module) => ({
     default: module.Login,
   }))
 );
