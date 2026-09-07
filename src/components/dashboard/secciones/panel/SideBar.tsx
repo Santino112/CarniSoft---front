@@ -52,7 +52,7 @@ function ResponsiveDrawer() {
             height: 'var(--app-height)',
             border: 'none',
             backgroundColor: "#ef444410",
-            backgroundImage: 'radial-gradient(ellipse at bottom left, #ef444409, transparent 100%)'
+            backgroundImage: 'radial-gradient(ellipse at bottom left, #ef444409)'
         }}>
             <Toolbar sx={{
                 display: "flex",
@@ -209,7 +209,13 @@ function ResponsiveDrawer() {
                     onClose={handleDrawerClose}
                     sx={{
                         display: { xs: "block", sm: "none" },
-                        "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
+                        "& .MuiDrawer-paper": {
+                            boxSizing: "border-box",
+                            width: drawerWidth,
+                            backgroundColor: "background.default",
+                            backgroundImage: 'radial-gradient(ellipse at bottom left, #ef444409)',
+                            color: "#ffffff"
+                        }
                     }}
                     slotProps={{
                         root: {
