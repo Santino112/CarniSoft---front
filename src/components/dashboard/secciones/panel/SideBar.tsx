@@ -13,7 +13,6 @@ import Button from '@mui/material/Button';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { useTheme, useMediaQuery } from '@mui/material';
 //Iconos sideBar
@@ -51,13 +50,14 @@ function ResponsiveDrawer() {
             display: 'flex',
             flexDirection: 'column',
             height: 'var(--app-height)',
-            border: 'none'
+            border: 'none',
+            backgroundColor: "#ef444410",
+            backgroundImage: 'radial-gradient(ellipse at bottom left, #ef444409, transparent 100%)'
         }}>
             <Toolbar sx={{
                 display: "flex",
                 justifyContent: "flex-start",
                 flexShrink: 0,
-                backgroundColor: "#1c1c1c",
                 border: 'none'
             }}>
                 <Typography variant="h5" noWrap component="div" sx={{
@@ -83,11 +83,10 @@ function ResponsiveDrawer() {
                     width: "100%",
                     minHeight: "250px",
                     p: 1,
-                    backgroundColor: "#1c1c1c",
                 }}
             >
                 <Button variant='contained' startIcon={<HomeRoundedIcon fontSize='medium' />} fullWidth onClick={() => setPaginaActiva("inicio")} sx={{
-                    display: {xs: 'none', sm: 'flex'},
+                    display: { xs: 'none', sm: 'flex' },
                     justifyContent: "flex-start",
                     backgroundColor: paginaActiva === 'inicio' ? '#454546' : 'transparent',
                     boxShadow: 2,
@@ -101,7 +100,7 @@ function ResponsiveDrawer() {
                     }
                 }}>Inicio</Button>
                 <Button variant='contained' startIcon={<ContentCutRoundedIcon fontSize='small' />} fullWidth onClick={() => setPaginaActiva("desposte")} sx={{
-                    display: {xs: 'none', sm: 'flex'},
+                    display: { xs: 'none', sm: 'flex' },
                     justifyContent: "flex-start",
                     backgroundColor: paginaActiva === 'desposte' ? '#454546' : 'transparent',
                     boxShadow: 2,
@@ -115,7 +114,7 @@ function ResponsiveDrawer() {
                     }
                 }}>Desposte de la res</Button>
                 <Button variant='contained' startIcon={<TrackChangesRoundedIcon fontSize='small' />} fullWidth onClick={() => setPaginaActiva("seguimiento")} sx={{
-                    display: {xs: 'none', sm: 'flex'},
+                    display: { xs: 'none', sm: 'flex' },
                     justifyContent: "flex-start",
                     backgroundColor: paginaActiva === 'seguimiento' ? '#454546' : 'transparent',
                     boxShadow: 2,
@@ -132,7 +131,7 @@ function ResponsiveDrawer() {
                     justifyContent: "flex-start",
                     backgroundColor: 'transparent',
                     color: '#ffffff',
-                    mt: {xs: 1, sm: 0},
+                    mt: { xs: 1, sm: 0 },
                     borderRadius: 3,
                     textTransform: 'none',
                     fontSize: '1rem',
@@ -159,12 +158,10 @@ function ResponsiveDrawer() {
             </Box>
             <Box sx={{
                 flexGrow: 1,
-                backgroundColor: "#1c1c1c",
                 border: 'none'
             }}>
             </Box>
-            <Divider sx={{ color: '#1c1c1c' }} />
-            <Box sx={{ mt: 'auto', border: 'none', backgroundColor: '#1c1c1c' }}>
+            <Box sx={{ mt: 'auto', border: 'none' }}>
                 <MenuUsuario />
             </Box>
         </Box>
@@ -184,8 +181,9 @@ function ResponsiveDrawer() {
             >
                 <Toolbar
                     sx={{
-                        display: { xs: 'none', sm: 'block' },
+                        display: 'none',
                         backgroundColor: "#1c1c1c",
+                        backgroundImage: 'radial-gradient(ellipse at top left, #ef44441f, transparent 100%)'
                     }}
                 >
                     <IconButton
@@ -251,7 +249,7 @@ function ResponsiveDrawer() {
                     },
                     minWidth: 0,
                     flexGrow: 1,
-                    pb: {xs: 6, md: 0},
+                    pb: { xs: 6, md: 0 },
                     mb: 0,
                     overflowY: "hidden",
                     scrollbarWidth: 'thin',
@@ -271,7 +269,6 @@ function ResponsiveDrawer() {
                     },
                 }}
             >
-                <Toolbar sx={{display: { xs: "none", sm: "block" }}}/>
                 <Box
                     sx={{
                         flexGrow: 1,
@@ -304,6 +301,7 @@ function ResponsiveDrawer() {
                     showLabels
                     value={paginaActiva}
                     onChange={(_event, newValue) => {
+                        if (newValue === 'menu') return;
                         setPaginaActiva(newValue);
                     }}
                     sx={{
@@ -330,8 +328,15 @@ function ResponsiveDrawer() {
                     />
                     <BottomNavigationAction
                         label="Menú"
+                        value="menu"
                         onClick={handleDrawerToggle}
                         icon={<MenuIcon />}
+                        sx={{
+                            color: mobileOpen ? 'primary.main' : 'inherit',
+                            '& .MuiBottomNavigationAction-label': {
+                                color: mobileOpen ? 'primary.main' : 'inherit',
+                            }
+                        }}
                     />
                 </BottomNavigation>
             </Paper>

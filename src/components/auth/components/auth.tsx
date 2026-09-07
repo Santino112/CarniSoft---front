@@ -155,7 +155,7 @@ export const Login = () => {
         }}
         >
             <Typography variant="overline" sx={{ color: "primary.main", letterSpacing: 3, fontWeight: 600, fontSize: '0.80rem' }}>
-                Llenar formulario
+                Llená el formulario
             </Typography>
         </Stack>
     );
@@ -189,7 +189,8 @@ export const Login = () => {
                         flexDirection: 'row',
                         justifyContent: "space-between",
                         alignItems: "center",
-                        px: { xs: 0, md: 6 },
+                        flexWrap: 'wrap',
+                        px: { xs: 1, md: 6 },
                     }}>
                         <Box
                             component="img"
@@ -197,8 +198,8 @@ export const Login = () => {
                             src={logo}
                             sx={{
                                 position: 'relative',
-                                right: { xs: '35px' },
-                                width: "auto",
+                                right: '40px',
+                                width: "fit-content",
                                 height: { xs: "55px", md: "55px" },
                             }}>
                         </Box>
@@ -223,8 +224,7 @@ export const Login = () => {
                                 sx={{
                                     color: "#ffffff",
                                     textTransform: "none",
-                                    px: { xs: 0.8, md: 1.2 },
-                                    mr: { xs: 1, sm: 1, md: 0 },
+                                    mr: { xs: 0, sm: 1, md: 2 },
                                     borderRadius: 3,
                                     "&:hover": { backgroundColor: "#454546" },
                                 }}
@@ -293,6 +293,7 @@ export const Login = () => {
                             justifyContent: "center",
                             p: { xs: 3, sm: 5 },
                             backgroundColor: "#1c1c1c",
+                            backgroundImage: 'radial-gradient(ellipse at top right, #ef44441f, transparent 100%)',
                             borderRadius: 0,
                         }}
                     >
@@ -696,6 +697,7 @@ export const Login = () => {
                         overflow: "hidden",
                         boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
                         backgroundColor: "#1c1c1c",
+                        backgroundImage: 'radial-gradient(ellipse, #ef44441f, transparent 100%)',
                     }}
                 >
                     <Typography
@@ -771,6 +773,7 @@ export const Login = () => {
                     minHeight: "50dvh",
                     width: "100%",
                     backgroundColor: "#1c1c1c",
+                    backgroundImage: 'radial-gradient(ellipse at bottom left, #ef44441f, transparent 100%)',
                     borderRadius: 4
                 }}
             >

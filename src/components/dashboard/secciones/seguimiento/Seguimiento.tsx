@@ -371,7 +371,7 @@ const Seguimiento = ({ }) => {
                   <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Kg asignados</TableCell>
                   <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Precio por kg</TableCell>
                   <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Proveedor</TableCell>
-                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Fecha de desposte</TableCell>
+                  {/* <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Fecha de desposte</TableCell> */}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -412,9 +412,9 @@ const Seguimiento = ({ }) => {
                         <TableCell align="center" sx={{ border: 'none' }}>
                           <Typography>{resSeleccionada?.proveedor}</Typography>
                         </TableCell>
-                        <TableCell align="center" sx={{ border: 'none' }}>
+                        {/* <TableCell align="center" sx={{ border: 'none' }}>
                           <Typography>{formatearFecha(c.creado_en)}</Typography>
-                        </TableCell>
+                        </TableCell> */}
                       </TableRow>
                     );
                   })
@@ -437,7 +437,7 @@ const Seguimiento = ({ }) => {
                   }}
                 />
               ) : hayResSeleccionada ? (
-                <Typography variant="h5" fontWeight={700} color="success.main">
+                <Typography variant="h5" fontWeight={500} color="success.main">
                   {(formatPesos(ingresoRecuperado))}
                 </Typography>
               ) : (
@@ -461,7 +461,7 @@ const Seguimiento = ({ }) => {
                   Ya se vendió todo
                 </Typography>
               ) : (
-                <Typography variant="h5" fontWeight={600} color="text.primary">{formatPesos(ingresoRestante)}</Typography>
+                <Typography variant="h5" fontWeight={500} color="text.primary">{formatPesos(ingresoRestante)}</Typography>
               )}
             </Paper>
           </Stack>
@@ -487,7 +487,7 @@ const Seguimiento = ({ }) => {
                   </>
                   :
                   <>
-                    <TrendingDownRoundedIcon sx={{ mr: 1 }} /> Falta para equilibrio
+                    <TrendingDownRoundedIcon sx={{ mr: 1 }} /> Falta para igualar
                   </>
                 }
               </Typography>
@@ -504,7 +504,7 @@ const Seguimiento = ({ }) => {
               ) : (
                 <Typography
                   variant="h5"
-                  fontWeight={700}
+                  fontWeight={500}
                   color={superoPuntoEquilibrio && ingresoRecuperado !== 0 ? "success.main" : "warning.main"}
                 >
                   {superoPuntoEquilibrio && ingresoRecuperado !== 0
@@ -526,7 +526,7 @@ const Seguimiento = ({ }) => {
               ) : !hayResSeleccionada ? (
                 <Typography variant="h5" fontWeight={600} color="text.primary">-/-</Typography>
               ) : (
-                <Typography variant="h5" fontWeight={600} color="text.primary">
+                <Typography variant="h5" fontWeight={500} color="text.primary">
                   {(cantidadDeCortes)}
                 </Typography>
               )}
@@ -547,7 +547,7 @@ const Seguimiento = ({ }) => {
       }}>
         <Box display="flex" justifyContent="space-between" mb={2}>
           <Box display="flex" alignItems="center" gap={1}>
-            <Typography variant="body2" fontWeight={500}>
+            <Typography variant="body2" fontWeight={600}>
               Equilibrio
             </Typography>
           </Box>
@@ -556,7 +556,7 @@ const Seguimiento = ({ }) => {
               {pctEquilibrio.toFixed(0)}% — {(formatPesos(ingresoRecuperado))} de {(formatPesos(costoTotal))}
             </Typography>
           ) : (
-            <Typography variant="body2" fontWeight={500}>
+            <Typography variant="body2" fontWeight={600}>
               Todavía no hay datos cargados.
             </Typography>
           )}
@@ -666,7 +666,7 @@ const Seguimiento = ({ }) => {
                         )}
                       </TableCell>
                       <TableCell align="center" sx={{ border: 'none' }}>
-                        <Typography color="success.main" fontWeight={500}>
+                        <Typography color="success.main" fontWeight={500} sx={{fontSize: '1rem'}}>
                           {(formatPesos(c.ingreso))}
                         </Typography>
                       </TableCell>

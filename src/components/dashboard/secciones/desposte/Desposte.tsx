@@ -62,7 +62,7 @@ const Desposte: React.FC<DesposteProps> = () => {
     n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
   const totalKgAsignados = cortes.reduce((sum, c) => sum + (c.kg || 0), 0);
   const mermaKg = pesoTotal - totalKgAsignados;
-  const mermaPct = pesoTotal > 0 ? (mermaKg / pesoTotal) * 100 : 0;
+  //const mermaPct = pesoTotal > 0 ? (mermaKg / pesoTotal) * 100 : 0;
   const progresoAsignado = Math.min((totalKgAsignados / pesoTotal) * 100, 100);
   const ingresoTotal = cortes.reduce((sum, c) => sum + (c.kg || 0) * (c.precio_por_kg || 0), 0);
   const costoRealPorKg = totalKgAsignados > 0 ? costoTotal / totalKgAsignados : 0;
@@ -134,6 +134,7 @@ const Desposte: React.FC<DesposteProps> = () => {
     localStorage.removeItem('desposte_corte_${user.id}');
     setResActual(null);
     limpiarCortes();
+    refetchReses();
   };
 
   const addCorte = (nombre = "") => {
@@ -349,7 +350,7 @@ const Desposte: React.FC<DesposteProps> = () => {
               <Typography sx={{ fontSize: { xs: '1.2rem' } }}>{resActual?.proveedor || '-/-'}</Typography>
             </Paper>
             <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", minWidth: 202, p: 1 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><ScaleIcon sx={{ mr: 1 }} /> Peso total comprado</Typography>
+              <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><ScaleIcon sx={{ mr: 1 }} /> Peso total</Typography>
               <Typography variant="h6">{resActual?.pesoKg || '-/-'} Kg</Typography>
             </Paper>
             <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", minWidth: 170, p: 2 }}>
@@ -362,10 +363,10 @@ const Desposte: React.FC<DesposteProps> = () => {
           <Stack flexDirection={'row'} gap={1} sx={{ width: '100%' }}>
             <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", p: 2 }}>
               <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><ReceiptLongRoundedIcon sx={{ mr: 1 }} /> Costo total</Typography>
-              <Typography variant="h6">{formatPesos(costoTotal) || '-/-'}</Typography>
+              <Typography variant="h6" color="warning.main">{formatPesos(costoTotal) || '-/-'}</Typography>
             </Paper>
             <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 4, borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", p: 2 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><EventRoundedIcon sx={{ mr: 1 }} /> Fecha de compra</Typography>
+              <Typography variant="body2" fontWeight={600} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}><EventRoundedIcon sx={{ mr: 1 }} /> Fecha compra</Typography>
               <Typography variant="h6">{formatearFecha(resActual?.fecha || '-/-')}</Typography>
             </Paper>
           </Stack>
@@ -379,7 +380,7 @@ const Desposte: React.FC<DesposteProps> = () => {
       <Paper variant="outlined" sx={{ borderRadius: 3, mb: 2, backgroundColor: 'transparent', border: 'none' }}>
         <Stack flexDirection={'row'} gap={1} flexWrap='wrap' sx={{ width: '100%', minWidth: 200, mb: 1.8 }}>
           <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", boxShadow: 4 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>Kilos asignados</Typography>
+            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Kilos asignados</Typography>
             {loadingCortes ? (
               <CircularProgress
                 size={20}
@@ -392,16 +393,20 @@ const Desposte: React.FC<DesposteProps> = () => {
             ) : (
               <Typography
                 variant="body2"
-                fontWeight={600}
-                color={totalKgAsignados > pesoTotal ? "error.main" : "text.primary"}
-                sx={{ fontSize: '1.2rem' }}
+                fontWeight={500}
+                color={totalKgAsignados >= pesoTotal ? "success.main" : "text.primary"}
+                sx={{ fontSize: '1rem' }}
               >
-                {totalKgAsignados.toFixed(1)} kg
+                {totalKgAsignados >= pesoTotal ? (
+                  "¡Todo asignado!"
+                ) : (
+                  `${totalKgAsignados.toFixed(1)} kg`
+                )}
               </Typography>
             )}
           </Paper>
           <Paper variant="outlined" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', borderRadius: 3, border: 'none', backgroundColor: "#1c1c1c", boxShadow: 4, p: 2 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>Merma estimada</Typography>
+            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Merma estimada</Typography>
             {loadingCortes ? (
               <CircularProgress
                 size={22}
@@ -412,8 +417,19 @@ const Desposte: React.FC<DesposteProps> = () => {
                 }}
               />
             ) : (
-              <Typography variant="body2" fontWeight={600} color="warning.main" sx={{ fontSize: '1.2rem' }}>
-                {mermaKg.toFixed(1)} kg ({mermaPct.toFixed(1)}%)
+              <Typography
+                variant="body2"
+                fontWeight={500}
+                color={totalKgAsignados >= pesoTotal ? "success.main" : "text.primary"}
+                sx={{ fontSize: '1rem' }}
+              >
+                {totalKgAsignados >= pesoTotal ? (
+                  "¡Todo asignado!"
+                ) : (
+                  <Typography variant="body2" fontWeight={500} color="warning.main" sx={{ fontSize: '1.2rem' }}>
+                    {mermaKg.toFixed(1)} kg
+                  </Typography>
+                )}
               </Typography>
             )}
           </Paper>
@@ -536,6 +552,7 @@ const Desposte: React.FC<DesposteProps> = () => {
                           variant="body2"
                           fontWeight={500}
                           color={ingreso > 0 ? "success.main" : "text.disabled"}
+                          sx={{ fontSize: '1rem' }}
                         >
                           {ingreso > 0 ? formatPesos(ingreso) : "—"}
                         </Typography>
@@ -626,7 +643,7 @@ const Desposte: React.FC<DesposteProps> = () => {
           <Button
             variant="contained"
             size="large"
-            disabled={loadingDesposte || cortes.length === 0 || resYaDespostada}
+            disabled={loadingDesposte || cortes.length === 0 || cortes.length === 1 || resYaDespostada || totalKgAsignados < pesoTotal || totalKgAsignados > pesoTotal }
             onClick={() => handleGuardar(cortes)}
             startIcon={<CheckCircleOutlineIcon />}
             sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}

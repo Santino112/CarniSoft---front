@@ -31,7 +31,7 @@ function MenuUsuario() {
     };
 
     return (
-        <Box sx={{ backgroundColor: '#1c1c1c' }}>
+        <Box>
             <Button
                 id='basic-button'
                 fullWidth
