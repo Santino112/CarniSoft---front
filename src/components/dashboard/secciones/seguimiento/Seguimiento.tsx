@@ -161,7 +161,7 @@ const Seguimiento = ({ }) => {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
-      timeZone: 'UTC'
+      timeZone: 'America/Argentina/Buenos_Aires'
     });
   };
 
@@ -371,7 +371,7 @@ const Seguimiento = ({ }) => {
                   <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Kg asignados</TableCell>
                   <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Precio por kg</TableCell>
                   <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Proveedor</TableCell>
-                  {/* <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Fecha de desposte</TableCell> */}
+                  <TableCell sx={{ fontWeight: 600, bgcolor: "#1c1c1c" }} align="center">Fecha de desposte</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -412,9 +412,9 @@ const Seguimiento = ({ }) => {
                         <TableCell align="center" sx={{ border: 'none' }}>
                           <Typography>{resSeleccionada?.proveedor}</Typography>
                         </TableCell>
-                        {/* <TableCell align="center" sx={{ border: 'none' }}>
+                        <TableCell align="center" sx={{ border: 'none' }}>
                           <Typography>{formatearFecha(c.creado_en)}</Typography>
-                        </TableCell> */}
+                        </TableCell>
                       </TableRow>
                     );
                   })
@@ -666,7 +666,7 @@ const Seguimiento = ({ }) => {
                         )}
                       </TableCell>
                       <TableCell align="center" sx={{ border: 'none' }}>
-                        <Typography color="success.main" fontWeight={500} sx={{fontSize: '1rem'}}>
+                        <Typography color="success.main" fontWeight={500} sx={{ fontSize: '1rem' }}>
                           {(formatPesos(c.ingreso))}
                         </Typography>
                       </TableCell>
@@ -702,17 +702,17 @@ const Seguimiento = ({ }) => {
         maxWidth="xs"
       >
         <DialogContent sx={{ bgcolor: "#1c1c1c", border: 'none' }}>
-          <Typography variant="h5" mb={1} fontWeight={600} sx={{display: 'flex', alignItems: 'center'}}>
+          <Typography variant="h5" mb={1} fontWeight={600} sx={{ display: 'flex', alignItems: 'center' }}>
             {selectedCorte ? (
               <>
                 Vender — {""}
                 <Box component="span" sx={{ color: "primary.main", ml: 1 }}>
-                   {selectedCorte.nombre}
+                  {selectedCorte.nombre}
                 </Box>
               </>
             ) : (
               <>
-                <PointOfSaleRoundedIcon sx={{mr: 1}}/>Registrar venta
+                <PointOfSaleRoundedIcon sx={{ mr: 1 }} />Registrar venta
               </>
             )}
           </Typography>
@@ -739,7 +739,7 @@ const Seguimiento = ({ }) => {
                   </Box>
                 </Box>
               ) : (
-                <Typography variant="body2" fontWeight={500} sx={{fontSize: '1rem', mt: 2}}>Ya vendiste todos los cortes</Typography>
+                <Typography variant="body2" fontWeight={500} sx={{ fontSize: '1rem', mt: 2 }}>Ya vendiste todos los cortes</Typography>
               )}
             </>
           ) : (
@@ -784,7 +784,7 @@ const Seguimiento = ({ }) => {
           {selectedCorte && (
             <Button
               variant="contained"
-              endIcon={<ArrowForwardIcon/>}
+              endIcon={<ArrowForwardIcon />}
               onClick={handleConfirmarVenta}
               disabled={!selectedCorte || !kgVenta || parseFloat(kgVenta) <= 0 || loadingVenta}
               sx={{ borderRadius: 3, color: "#ffffff", textTransform: "none", fontSize: '1rem', width: { xs: '100%', sm: '100%', md: '60%' }, mx: 0.50 }}

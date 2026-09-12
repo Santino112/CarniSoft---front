@@ -16,7 +16,7 @@ import AddIcon from "@mui/icons-material/Add";
 import ScaleIcon from "@mui/icons-material/Scale";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 interface NuevaResProps {
@@ -67,65 +67,79 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte, onCancelar }) =>
   };
 
   return (
-    <Box component='form' onSubmit={handleNuevaRes} sx={{p: { xs: 2.3, sm: 4 }, bgcolor: "#1c1c1c", border: 'none' }}>
-      <Typography variant="h5" mb={1} fontWeight={600} sx={{display: 'flex', alignItems: 'center'}}>
-        <AddIcon fontSize="medium" sx={{mr: 1}}/>Nueva res
-      </Typography>
-      <Typography variant="body2" mb={2} sx={{ fontSize: '1rem' }}>
-        Registrá los datos de la compra para iniciar el desposte.
-      </Typography>
+    <Box component='form' onSubmit={handleNuevaRes} sx={{ p: { xs: 2.3, sm: 4 }, bgcolor: "#1c1c1c" }}>
+      <Box sx={{ position: 'sticky', top: 0, zIndex: 10, pb: 1, bgcolor: "#1c1c1c" }}>
+        <Typography variant="h5" mb={1} fontWeight={600} sx={{ display: 'flex', alignItems: 'center' }}>
+          <AddIcon fontSize="medium" sx={{ mr: 1 }} />Nueva res
+        </Typography>
+        <Typography variant="body2" sx={{ fontSize: '1rem' }}>
+          Registrá los datos de la compra para iniciar el desposte.
+        </Typography>
+      </Box>
       <Divider sx={{ my: 1 }} />
-      <Paper variant="outlined" sx={{borderRadius: 3, mb: 3, bgcolor: "#1c1c1c", border: 'none' }}>
+      <Paper variant="outlined" sx={{
+        borderRadius: 3,
+        mb: 2,
+        bgcolor: "#1c1c1c",
+        border: 'none'
+      }}>
         <Typography variant="overline">
           Datos de la compra
         </Typography>
-        <Box display="flex" flexDirection="column" gap={2.5} mt={2}>
-          <TextField
-            label="Proveedor"
-            value={proveedor}
-            onChange={(e) => setProveedor(e.target.value)}
-            placeholder="Ej: Frigorífico Don Pedro"
-            fullWidth
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 3,
-              }
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <StorefrontIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
+        <Box display="flex" flexDirection='column' gap={2.5} mt={2}>
+          <Box display="flex" flexDirection={{ xs: 'column', sm: 'column', md: 'row', lg: 'row', xl: 'column' }} gap={2}>
+            <TextField
+              label="Proveedor"
+              value={proveedor}
+              onChange={(e) => setProveedor(e.target.value)}
+              placeholder="Ej: Frigorífico Don Pedro"
+              fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                }
+              }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <StorefrontIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
 
-          <TextField
-            label="Fecha de compra"
-            type="date"
-            value={fechaCompra}
-            onChange={(e) => setFechaCompra(e.target.value)}
-            fullWidth
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 3,
-              }
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <CalendarTodayIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-              },
-              inputLabel: { shrink: true },
-            }}
-          />
+            <TextField
+              label="Fecha de compra"
+              type="date"
+              value={fechaCompra}
+              onChange={(e) => setFechaCompra(e.target.value)}
+              fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                },
+                '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                  filter: 'invert(1)', 
+                  cursor: 'pointer',
+                  transform: 'scale(1.2)'
+                }
+              }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EditCalendarIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                },
+                inputLabel: { shrink: true },
+              }}
+            />
+          </Box>
 
-          <Box display="flex" gap={2}>
+          <Box display="flex" flexDirection='row' gap={2}>
             <TextField
               label="Peso total"
               type="number"
@@ -181,7 +195,7 @@ const NuevaRes: React.FC<NuevaResProps> = ({ onIniciarDesposte, onCancelar }) =>
           borderRadius: 3,
           mb: 3,
           bgcolor: costoTotal > 0 ? "#111111" : "transparent",
-          borderColor: costoTotal > 0 ? "primary.200" : "divider",
+          border: 'none',
           transition: "all 0.2s ease",
         }}
       >

@@ -264,7 +264,7 @@ const Desposte: React.FC<DesposteProps> = () => {
           </Typography>
         </Box>
       </Box>
-      <Stack flexDirection={{ xs: 'column', sm: 'column', md: 'row' }} gap={2} sx={{ mb: 2.2, width: '100%' }}>
+      <Stack flexDirection={{ xs: 'column', sm: 'column', md: 'column', lg: 'column', xl: 'row' }} gap={2} sx={{ mb: 2.2, width: '100%' }}>
         <Paper variant="outlined" sx={{ borderRadius: 3, boxShadow: 4, width: { xs: '100%', sm: '100%', md: '100%' }, fontSize: '1rem', overflow: 'hidden', backgroundColor: "#1c1c1c", border: 'none' }}>
           <TableContainer sx={{ maxHeight: 320, minHeight: 100 }}>
             <Table stickyHeader aria-label="sticky table">
@@ -587,7 +587,7 @@ const Desposte: React.FC<DesposteProps> = () => {
                 key={s}
                 label={s}
                 size="small"
-                disabled={resYaDespostada}
+                disabled={resYaDespostada || Math.round(totalKgAsignados * 100) >= Math.round(pesoTotal * 100) || loadingDesposte}
                 onClick={() => addCorte(s)}
                 icon={<AddIcon />}
                 variant="outlined"
@@ -597,7 +597,7 @@ const Desposte: React.FC<DesposteProps> = () => {
           </Box>
           <Button
             startIcon={<AddIcon />}
-            disabled={resYaDespostada}
+            disabled={resYaDespostada || Math.round(totalKgAsignados * 100) >= Math.round(pesoTotal * 100) || loadingDesposte}
             onClick={() => addCorte()}
             sx={{ mt: 2, textTransform: 'none', fontSize: '0.90rem', borderRadius: 3, backgroundColor: '#ef44441b' }}
           >
@@ -643,7 +643,12 @@ const Desposte: React.FC<DesposteProps> = () => {
           <Button
             variant="contained"
             size="large"
-            disabled={loadingDesposte || cortes.length === 0 || cortes.length === 1 || resYaDespostada || totalKgAsignados < pesoTotal || totalKgAsignados > pesoTotal }
+            disabled={
+              loadingDesposte || 
+              cortes.length === 0 || 
+              resYaDespostada || 
+              Math.round(totalKgAsignados * 100) !== Math.round(pesoTotal * 100)  
+            }
             onClick={() => handleGuardar(cortes)}
             startIcon={<CheckCircleOutlineIcon />}
             sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}
