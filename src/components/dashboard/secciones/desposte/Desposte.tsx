@@ -513,9 +513,12 @@ const Desposte: React.FC<DesposteProps> = () => {
                       <TableCell sx={{ border: 'none' }}>
                         <TextField
                           type="number"
-                          value={corte.kg || ""}
+                          value={corte.kg === 0 ? '' : corte.kg}
                           disabled={resYaDespostada}
-                          onChange={(e) => updateCorte(corte.id, "kg", parseFloat(e.target.value) || 0)}
+                          onChange={(e) => {
+                            const valor = e.target.value;
+                            updateCorte(corte.id, "kg", valor === '' ? 0 : parseFloat(valor))
+                          }}
                           size="small"
                           variant="standard"
                           sx={{ width: 80 }}
@@ -644,10 +647,10 @@ const Desposte: React.FC<DesposteProps> = () => {
             variant="contained"
             size="large"
             disabled={
-              loadingDesposte || 
-              cortes.length === 0 || 
-              resYaDespostada || 
-              Math.round(totalKgAsignados * 100) !== Math.round(pesoTotal * 100)  
+              loadingDesposte ||
+              cortes.length === 0 ||
+              resYaDespostada ||
+              Math.round(totalKgAsignados * 100) !== Math.round(pesoTotal * 100)
             }
             onClick={() => handleGuardar(cortes)}
             startIcon={<CheckCircleOutlineIcon />}
