@@ -132,10 +132,11 @@ const Seguimiento = ({ }) => {
   const handleConfirmarVenta = async () => {
     if (!selectedCorte) return;
     const kg = parseFloat(kgVenta) || 0;
+    const kgRestante = Math.round(selectedCorte.kgRestante * 100) / 100  // ← redondeás a 2 decimales
     if (kg <= 0) return;
 
-    if (kg > selectedCorte.kgRestante) {
-      showSnackbar(`No podes vender más de ${selectedCorte.kgRestante} Kg disponbles.`, 'error');
+    if (kg > kgRestante) {
+      showSnackbar(`No podés vender más de ${kgRestante} kg disponibles.`, 'error');
       return;
     }
 
@@ -745,7 +746,7 @@ const Seguimiento = ({ }) => {
           ) : (
             <Box sx={{ bgcolor: "#1c1c1c", border: 'none', width: '100%' }}>
               <Typography variant="body2" mb={2} sx={{ fontSize: '1rem' }}>
-                Disponible: {(selectedCorte.kgTotal - selectedCorte.kgVendido).toFixed(1)} Kg ·{" "}
+                Disponible: {(Math.round(selectedCorte.kgRestante * 100) / 100).toFixed(1)} Kg ·{" "}
                 {(selectedCorte.precioPorKg)}/Kg
               </Typography>
               <TextField
