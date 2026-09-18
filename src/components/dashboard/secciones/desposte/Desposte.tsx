@@ -590,7 +590,7 @@ const Desposte: React.FC<DesposteProps> = () => {
                 key={s}
                 label={s}
                 size="small"
-                disabled={resYaDespostada || Math.round(totalKgAsignados * 1000) !== Math.round(pesoTotal * 1000) || loadingDesposte}
+                disabled={resYaDespostada || Math.round(totalKgAsignados * 1000) >= Math.round(pesoTotal * 1000) || loadingDesposte}
                 onClick={() => addCorte(s)}
                 icon={<AddIcon />}
                 variant="outlined"
@@ -600,7 +600,7 @@ const Desposte: React.FC<DesposteProps> = () => {
           </Box>
           <Button
             startIcon={<AddIcon />}
-            disabled={resYaDespostada || Math.round(totalKgAsignados * 1000) !== Math.round(pesoTotal * 1000) || loadingDesposte}
+            disabled={resYaDespostada || Math.round(totalKgAsignados * 1000) >= Math.round(pesoTotal * 1000) || loadingDesposte}
             onClick={() => addCorte()}
             sx={{ mt: 2, textTransform: 'none', fontSize: '0.90rem', borderRadius: 3, backgroundColor: '#ef44441b' }}
           >
