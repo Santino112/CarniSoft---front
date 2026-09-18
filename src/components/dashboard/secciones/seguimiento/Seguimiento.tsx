@@ -56,7 +56,9 @@ const Seguimiento = ({ }) => {
   const { registrarVentaRealizada, loadingVenta } = useRegistrarVenta();
   const { showSnackbar } = useSnackbar();
   let [hayResSeleccionada, setHayResSeleccionada] = useState(false);
-  const todosAgotados = cortesFiltrados.every(c => c.kgVendido >= c.kgTotal)
+  const todosAgotados = cortesFiltrados.every(c =>
+    Math.round(c.kgVendido * 1000) >= Math.round(c.kgTotal * 1000)
+  );
 
   const costoTotal = (resSeleccionada?.peso_total ?? 0) * (resSeleccionada?.precio_kg ?? 0);
   const cantidadDeCortes = cortesFiltrados.length;
@@ -67,7 +69,7 @@ const Seguimiento = ({ }) => {
     (sum, c) => sum + Math.max(c.kgTotal - c.kgVendido, 0) * c.precioPorKg, 0
   );
   const todoVendido = ingresoRestante === 0;
-  const pctEquilibrio = Math.min((ingresoRecuperado / costoTotal) * 100, 100);
+  const pctEquilibrio = Math.min(Math.round((ingresoRecuperado / costoTotal) * 100), 100);
   const superoPuntoEquilibrio = ingresoRecuperado >= costoTotal;
   const gananciaActual = ingresoRecuperado - costoTotal;
 
@@ -632,8 +634,8 @@ const Seguimiento = ({ }) => {
                 </TableRow>
               ) : (
                 cortesFiltrados.map((c) => {
-                  const pct = (c.kgVendido / c.kgTotal) * 100;
-                  const agotado = c.kgVendido >= c.kgTotal;
+                  const pct = Math.min(Math.round((c.kgVendido / c.kgTotal) * 100), 100);
+                  const agotado = Math.round(c.kgVendido * 1000) >= Math.round(c.kgTotal * 1000);
                   return (
                     <TableRow key={c.id} hover sx={{ border: 'none' }}>
                       <TableCell align="center" sx={{ border: 'none' }}>
@@ -746,7 +748,7 @@ const Seguimiento = ({ }) => {
           ) : (
             <Box sx={{ bgcolor: "#1c1c1c", border: 'none', width: '100%' }}>
               <Typography variant="body2" mb={2} sx={{ fontSize: '1rem' }}>
-                Disponible: {(Math.round(selectedCorte.kgRestante * 100) / 100).toFixed(1)} Kg ·{" "}
+                Disponible: {parseFloat((Math.round(selectedCorte.kgRestante * 1000) / 1000).toFixed(3))} Kg ·{" "}
                 {(selectedCorte.precioPorKg)}/Kg
               </Typography>
               <TextField
