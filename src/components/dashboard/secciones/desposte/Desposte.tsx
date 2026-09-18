@@ -61,7 +61,7 @@ const Desposte: React.FC<DesposteProps> = () => {
   const formatPesos = (n: number) =>
     n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
   const totalKgAsignados = cortes.reduce((sum, c) => sum + (c.kg || 0), 0);
-  const mermaKg = pesoTotal - totalKgAsignados;
+  const mermaKg = Math.round((pesoTotal - totalKgAsignados) * 10000) / 10000;
   //const mermaPct = pesoTotal > 0 ? (mermaKg / pesoTotal) * 100 : 0;
   const progresoAsignado = Math.min((totalKgAsignados / pesoTotal) * 100, 100);
   const ingresoTotal = cortes.reduce((sum, c) => sum + (c.kg || 0) * (c.precio_por_kg || 0), 0);
@@ -427,7 +427,7 @@ const Desposte: React.FC<DesposteProps> = () => {
                   "¡Todo asignado!"
                 ) : (
                   <Typography variant="body2" fontWeight={500} color="warning.main" sx={{ fontSize: '1.2rem' }}>
-                    {mermaKg.toFixed(1)} kg
+                    {mermaKg % 1 === 0 ? mermaKg : mermaKg.toFixed(3)} kg
                   </Typography>
                 )}
               </Typography>
@@ -590,7 +590,7 @@ const Desposte: React.FC<DesposteProps> = () => {
                 key={s}
                 label={s}
                 size="small"
-                disabled={resYaDespostada || Math.round(totalKgAsignados * 100) >= Math.round(pesoTotal * 100) || loadingDesposte}
+                disabled={resYaDespostada || Math.round(totalKgAsignados * 1000) !== Math.round(pesoTotal * 1000) || loadingDesposte}
                 onClick={() => addCorte(s)}
                 icon={<AddIcon />}
                 variant="outlined"
@@ -600,7 +600,7 @@ const Desposte: React.FC<DesposteProps> = () => {
           </Box>
           <Button
             startIcon={<AddIcon />}
-            disabled={resYaDespostada || Math.round(totalKgAsignados * 100) >= Math.round(pesoTotal * 100) || loadingDesposte}
+            disabled={resYaDespostada || Math.round(totalKgAsignados * 1000) !== Math.round(pesoTotal * 1000) || loadingDesposte}
             onClick={() => addCorte()}
             sx={{ mt: 2, textTransform: 'none', fontSize: '0.90rem', borderRadius: 3, backgroundColor: '#ef44441b' }}
           >
@@ -650,11 +650,11 @@ const Desposte: React.FC<DesposteProps> = () => {
               loadingDesposte ||
               cortes.length === 0 ||
               resYaDespostada ||
-              Math.round(totalKgAsignados * 100) !== Math.round(pesoTotal * 100)
+              Math.round(totalKgAsignados * 10000) !== Math.round(pesoTotal * 10000)
             }
             onClick={() => handleGuardar(cortes)}
             startIcon={<CheckCircleOutlineIcon />}
-            sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}
+            sx={{ borderRadius: 3, fontWeight: 600, textTransform: 'none' }}
           >
             {loadingDesposte ? (
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
