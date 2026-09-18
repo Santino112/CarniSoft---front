@@ -660,7 +660,7 @@ const Seguimiento = ({ }) => {
                       <TableCell align="center" sx={{ border: 'none' }}>
                         {!agotado ? (
                           <Typography color="body2">
-                            Restan {c.kgRestante.toFixed(1)} kg
+                            Restan {parseFloat((Math.round(c.kgRestante * 1000) / 1000).toFixed(3))} kg
                           </Typography>
                         ) : (
                           <Typography color="text.secondary">
